@@ -1,0 +1,278 @@
+id: intro-agentic-ai
+title: Introduction to Agentic AI
+description: Understand what AI agents are, how they differ from traditional and one-shot AI systems, and where agentic thinking is headed — no coding required.
+icon: robot
+version: "1.0"
+tags:
+  - AI
+  - Agents
+  - Fundamentals
+  - Automation
+
+steps:
+  - id: classical-ai
+    type: concept
+    title: 'Before Agents: Traditional AI and Gen AI'
+    content: |
+      When people say **"AI"**, they often lump together two very different things that came before modern agents:
+
+      - **Traditional AI** — game AI, rule engines, expert systems, spam filters, recommenders
+      - **Gen AI** — a single binary file, several gigabytes in size, known as a **model**; a heavily compressed archive containing billions of examples of the type of data you want to create. Used to perform **inference** ([transformer algorithm](https://research.google/pubs/attention-is-all-you-need/)), which is capable of convincingly guessing the next most likely **token** to occur in a given pattern.
+        - **Large Language Model** (**LLM**): a collection of most human communication on the Internet. Where 1 token = the next most likely word in a given sentence.
+        - **Vision Language Model** (**VLM**): a collection of images labeled by humans. Where tokens produce a written description of a given image.
+        - and so on... there are models which convert: speech to text (STT), text to speech (TTS), text to (image, video, music, or sound effects), etc.
+
+  - id: what-is-an-agent
+    type: concept
+    title: What Makes Something an Agent?
+    content: |
+      My definition of an **agent**:
+
+      > An agent is an AI that can **reason and take action in the real world**.
+
+      In practice, that usually means the system can:
+      1. **Perceive** what is happening
+      2. **Reason** about what to do next
+      3. **Make a tool call**
+      4. **Observe the result and continue** until the goal is reached
+
+      This is known as the agentic loop, and AI inference is what happens inside of it.
+
+  - id: watch-agents-video
+    type: concept
+    title: Watch First — AI Agents in 10 Minutes
+    content: |
+      This short video does a good job of showing what AI agents are and why they matter.
+
+      https://www.youtube.com/watch?v=FwOTs4UxQS4
+
+      The remainder of this course will build upon these concepts.
+
+  - id: quiz-ai-vs-agent
+    type: challenge
+    kind: multiple-choice
+    title: 'Check Your Understanding — AI vs. Agents'
+    question: Which property most clearly distinguishes an AI agent from a non-agent AI system?
+    choices:
+      - id: a
+        text: The agent uses a larger neural network
+      - id: b
+        text: The agent runs a perceive-reason-act loop and persists state across steps
+        correct: true
+      - id: c
+        text: The agent was trained on more recent data
+      - id: d
+        text: The agent can only respond to text inputs
+    explanation: |
+      The agent loop — perceive, reason, make a tool call, repeat — is what defines agency. Model size is irrelevant. A non-agent system produces an output and stops; an agent keeps working toward a goal.
+
+  - id: human-agency
+    type: concept
+    title: 'Agency in Humans: What It Is and Why It Matters'
+    content: |
+      **Agency** — in humans — is the capacity to act independently, initiate action, and direct your own behavior toward a goal.
+
+      A **high-agency person** does not wait to be told what to do. They:
+      - Identify a problem without being asked
+      - Decide on a course of action
+      - Execute it without hand-holding
+      - Adjust when things go wrong
+
+      In a world where leverage compounds — where one person with the right tools can accomplish what ten people could before — high agency is one of the most valuable traits a professional can have.
+
+      > "High agency is what separates the people who shape the world from the people who wait for the world to change."
+
+      This framing matters because its exactly what we are trying to embody in our software. Seek to maximize agency.
+
+  - id: capability-perception
+    type: concept
+    title: 'Perception: What the Agent Can See'
+    content: |
+      **Perception** is everything the agent can take as input.
+
+      Modern agents can perceive:
+      - **Text** — documents, emails, chat messages, web pages
+      - **Files** — code, PDFs, spreadsheets, logs
+      - **Screenshots** — the current state of a browser or desktop
+      - **Browser state** — DOM structure, network requests, rendered UI
+      - **API data** — structured responses from external services
+      - **Sensor inputs** — location, time, device state (in mobile/IoT contexts)
+
+      > Analogy: perception is the agent's **eyes and ears**. It shapes your agent's understanding of its environment.
+
+      An agent that can only read text is limited to text tasks. An agent that can see a screenshot can do anything a human clicking a UI can do.
+
+  - id: capability-reasoning
+    type: concept
+    title: 'Reasoning: How the Agent Decides'
+    content: |
+      **Reasoning** is how the agent turns perception into a plan of action.
+
+      While a surprising amount of reasoning is driven by model weights alone, today many steps occur outside the model; in the agentic loop, the **harness**, and subagents--using a mix of expert models (ie. many inference calls). This secret sauce distinguishes the "feel" of one AI provider to another.
+
+      > A **harness** is the surrounding runtime that gives the model tools, instructions, memory, and control flow. (ie. claude code, opencode, vscode, etc.)
+
+      > A **subagent** is a model called by another model automatically. (ie. to perform work and summarize the result, or to iterate over a list of work in parallel, etc.)
+
+      Common reasoning strategies:
+      - **Chain-of-thought** — the agent "thinks out loud" before acting, producing better decisions
+      - **ReAct (Reason + Act)** — alternates between reasoning about the situation and taking an action, then observing the result
+      - **Task decomposition** — breaks a complex goal into sub-tasks and sequences them into a tasklist before executing
+
+      A poorly-reasoned agent gets lost or stuck frequently.
+      A well-reasoned agent overcomes any obstacle. 
+
+  - id: capability-action
+    type: concept
+    title: 'Tool Calls: What the Agent Can Do'
+    content: |
+      The **tool call** allowlist defines an agent's *capabilities*.
+
+      Common examples (imagine one function() for each):
+      - **Searching** for information
+      - **Writing files** or changing code
+      - **Clicking in a browser** or filling out forms
+      - **Calling an API**
+      - **Sending a message** by email, Slack, or SMS
+      - **Delegating** to another agent
+
+      > Analogy: tool calls are the agent's **hands**.
+
+      This list of tools is provided in advance of sending any prompt. The model will consider this list when deciding how to respond. When the model decides it's appropriate to use a tool, it will return a list of function invocations.
+
+  - id: capability-memory
+    type: concept
+    title: 'Context Window: What Is In the Agent''s Head Right Now'
+    content: |
+      The **context window** is the amount of memory the agent has to work with, often **200K tokens**. The agent has *perfect recall* over everything inside this window. Anything that cannot fit or falls outside becomes unknown/forgotten.
+      
+      That usually includes:
+      - the system prompt and instructions
+      - the recent conversation
+      - tool results
+      - any files, notes, or retrieved facts added for the current task
+
+      How does a ChatGPT session go forever? When the context window gets too full, **compaction** happens; a sub-agent decides what to keep, summarize, or drop. This is how an LLM forgets; the longer a session runs, the more it *must* forget. Inevitably, this increases mistakes and **hallucinations** — confident-sounding statements that are completely unsupported.
+
+      Providers continually improve compaction strategies, but most are proprietary with room for improvement. Optimizing the context window is still something humans do better. Like early programmers constrained to 8K of RAM, this environment rewards cleverness and restraint.
+
+      > The best compaction is no compaction.
+
+      When you notice compaction or degraded recall, **start a new session** and reload the context intentionally from markdown files. Better yet, get the result you need inside a single context window. That is the start of **context engineering**: controlling exactly what enters the context window instead of relying on generalized provider strategies that accumulate noise.
+
+  - id: quiz-context-window
+    type: challenge
+    kind: multiple-choice
+    title: 'Check Your Understanding — Context Window'
+    question: What is the best practical response when a long-running agent session starts compacting aggressively and losing recall?
+    choices:
+      - id: a
+        text: Add even more unrelated context so the model has more to work with
+      - id: b
+        text: Start a fresh session and reload only the context needed for the task
+        correct: true
+      - id: c
+        text: Keep the same session going because compaction usually improves accuracy over time
+      - id: d
+        text: Turn every tool into a SKILL.md file and leave the session untouched
+    explanation: |
+      When compaction starts degrading recall, the safest move is usually to start a fresh session and intentionally reload only the context that matters. That is a core context-engineering habit.
+
+  - id: vector-memory
+    type: concept
+    title: 'Advanced Memory Strategies'
+    content: |
+      Human memory is not just one thing. You remember experiences, facts, instructions, and whatever is top of mind right now. Advanced agentic systems simulate those same categories in different ways.
+
+      Practical examples of each:
+      - **Episodic memory** — records of what the agent did before. Example: storing past actions, user requests, and outcomes in a markdown journal so a future run can retrieve similar cases.
+      - **Semantic memory** — facts the agent should know. Example: product docs, or customer notes retrieved from a knowledgebase.
+      - **Procedural memory** — instructions for how the agent should behave. Example: the system prompt, tool definitions, and SKILL files loaded at the start of a run.
+      - **Working memory** — the specific context assembled for this task right now. Example: the context window
+
+      Often this data is collected from a variety of databases:
+      - A **document database** will find information by **full-text search**; ie. exact-match keywords
+      - A **vector database** will find information by **meaning**; ie. "pet food" matches "small animal snacks"
+      - A **graph database** will find information by **relationship**; ie. thing1 relatesTo thing2
+
+      
+      By combining these approaches you begin to touch upon *perfect recall across infinite memory*.
+
+  - id: maturity-levels
+    type: concept
+    title: 'Levels of Autonomy'
+    content: |
+      Most agents begin life the way babies do: needy, dependent, and requiring constant attention. Early on, you spend a lot of time correcting mistakes and cleaning up after them.
+      The goal, as with any good parent, is independence: an agent that can operate successfully on its own, remain always-on and unattended, and earn a high-trust relationship with you over time.
+
+      - **Push-Prompted:** works only while you are watching; you provide the prompt, supervision, and working memory. (non-scalable)
+      - **Workflow:** runs to completion inside a narrow task, like a nightly summarizer or code reviewer. (scale: one task)
+      - **Companion Agent:** runs in the background, knows your preferences, and acts on your behalf with selective escalation (scale: many tasks)
+      - **Self-Replicating:** decomposes goals, coordinates sub-agents, and adapts autonomously; still mostly frontier territory today (scale: exponential)
+
+      The higher levels of autonomy largely remain unsolved in the industry.
+
+  - id: agent-conventions
+    type: concept
+    title: Harness Conventions
+    content: |
+      Between Anthropic, Microsoft, xAI and the other providers, a variety of agentic standards and conventions have emerged. Here are just a few that are handy to know about:
+
+      - [.claude/](https://code.claude.com/docs/en/claude-directory): a directory where Claude Code-style tools keep skills, memory, and configuration
+      - [AGENT.md](https://agents.md/): project-level instructions for the agent, like repo structure, coding rules, and commands to run
+      - **.copilotignore**: a file that tells Copilot which paths it should avoid reading or using as context; a soft guard for generally sensitive files
+        - **NOTE:** not fool-proof; agent may read via tools (ie. shell tool > `cat` command)
+      - [SKILL.md](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview): a Markdown instruction file that teaches the agent how to do a specific task well
+
+
+  - id: skill-files
+    type: concept
+    title: 'Skills for Agents'
+    content: |
+      A **SKILL.md** file is a Markdown document that tells an agent *how to perform a specific task*.
+
+      It has two parts:
+      1. **YAML frontmatter** — metadata the agent uses to decide when to load the skill
+      2. **Markdown body** — step-by-step instructions, examples, and rules
+
+      Example frontmatter:
+      ```
+      ---
+      name: jira-ticket-manager
+      description: Fetch, summarize, update, and transition Jira tickets
+      ---
+
+      To work a Jira ticket, begin by ...
+      ```
+
+      Why create skill files at all? Because the context window is limited. You cannot fit hundreds of tools, docs, and task-specific instructions into every prompt and still expect the agent to perform well.
+
+      Many agent harnesses apply *just-in-time loading* strategies to scan a new user prompt for keywords/intent, and match that against a list of skill files by title and description, and then auto-inject relevant skill files into the context window.
+
+      Besides being modular, resuable, composable, and sharable... Skill files solve a context-management problem.
+
+  - id: flashcards-core-concepts
+    type: challenge
+    kind: flashcards
+    title: Core Concepts — Flashcard Review
+    cards:
+      - front: What is the agent loop?
+        back: 'Perceive → Reason → Make a tool call → Observe result → Repeat until the goal is reached.'
+      - front: What are the four core agent capabilities?
+        back: Perception, Reasoning, Tool Use, and Memory.
+      - front: What defines a workflow agent?
+        back: It runs unattended inside a narrow, well-defined task.
+      - front: What makes a companion agent different from a workflow?
+        back: It knows your preferences and acts on your behalf across many tasks, not just one narrow workflow.
+      - front: What is the context window?
+        back: The active prompt memory available to the model for the current session.
+      - front: What does compaction do?
+        back: It summarizes older context so the important facts still fit inside a limited context window.
+      - front: What is semantic search?
+        back: Searching by meaning rather than exact keywords.
+      - front: What does AGENT.md do?
+        back: If it exists, it is typically the first project file the agent reads and its instructions are automatically loaded into the system prompt for every task.
+      - front: What does .copilotignore do?
+        back: Lists files and paths the agent should avoid reading or using as context; it is a soft defense for generally sensitive files, not a hard security boundary.
+      - front: What is a SKILL.md file?
+        back: A Markdown instruction file with YAML frontmatter that tells the agent how to perform a specific task.

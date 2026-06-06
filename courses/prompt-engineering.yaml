@@ -1,0 +1,489 @@
+id: prompt-engineering
+title: "Prompt Engineering"
+description: From how LLMs actually work to practical prompting techniques — the essential skill for getting the most out of generative AI as a user, developer, or team.
+icon: chat-text
+version: "1.0"
+tags:
+  - AI
+  - Prompt Engineering
+  - LLMs
+  - Generative AI
+  - Fundamentals
+
+steps:
+
+  - id: intro-video
+    type: concept
+    title: "Watch: Prompt Engineering Fundamentals"
+    content: |
+      This course is based on Henrik Kniberg's widely shared introduction to
+      generative AI and prompt engineering. It covers everything from how LLMs
+      work under the hood to practical techniques for getting great results —
+      with no fluff and plenty of concrete examples.
+
+      https://www.youtube.com/watch?v=2IK3DFHRFfw
+
+      ### What this course covers
+
+      - What generative AI is and how it differs from traditional AI
+      - How large language models are trained and why they work
+      - The landscape of model types and how to choose
+      - The right mindset for the AI era
+      - Practical prompt engineering techniques you can use today
+      - Where autonomous agents fit in — and why prompting matters even more there
+
+  - id: what-is-generative-ai
+    type: concept
+    title: What is Generative AI?
+    content: |
+      For decades, computers were glorified calculators — machines that executed
+      exact instructions. Generative AI changes this fundamentally: computers
+      can now learn, reason, and communicate in human language.
+
+      ### Key terms
+
+      | Term | Definition |
+      |------|-----------|
+      | **AI (Artificial Intelligence)** | Systems that simulate intelligent behaviour. Not new — recommendation engines, fraud detection, and search rankings are all traditional AI. |
+      | **Generative AI** | AI that generates *new, original content* rather than classifying or retrieving existing content. The "G" in GPT. |
+      | **LLM (Large Language Model)** | A type of generative AI that communicates in natural human language. The foundation of ChatGPT, Claude, Gemini, and most AI assistants. |
+      | **Transformer architecture** | The breakthrough neural network design (2017) that made modern LLMs possible. The "T" in GPT. |
+
+      ### The Einstein metaphor
+
+      A useful mental model: imagine you have access to the combined knowledge
+      of every smart person who ever lived — available instantly, never impatient,
+      able to take on any role.
+
+      The biggest limitation isn't the technology. It's your ability to
+      communicate effectively with it. That skill is **prompt engineering**.
+
+      > "Most people vastly underestimate what this Einstein in the basement can
+      > do. It's like hiring a five-star chef and having him chop onions."
+
+  - id: how-llms-work
+    type: concept
+    title: How Large Language Models Work
+    content: |
+      Understanding what's happening inside an LLM makes you a dramatically
+      better prompt engineer.
+
+      ### The core mechanism: next-word prediction
+
+      An LLM is a neural network — billions of numbers (parameters) connected
+      to each other, similar to how neurons connect in a brain. At the most
+      basic level it does one thing: **predict the next word**.
+
+      ```
+      Input:  "Dogs are"
+      Output: "animals"
+      ```
+
+      Repeat: take that output, append it to the input, predict again. That's
+      the loop running behind the scenes as ChatGPT "types" a response.
+
+      ### Training: learning from text
+
+      The model isn't manually programmed. It learns — like a baby learning
+      to speak:
+
+      1. **Pre-training** — fed a mind-boggling amount of text (mostly the
+         internet). Plays "guess the next word" billions of times. Parameters
+         are automatically adjusted when it guesses wrong. (This is called
+         *back-propagation*.)
+
+      2. **Human feedback (RLHF)** — thousands of hours of humans testing
+         outputs and giving feedback. This is why GPT won't tell you how to
+         rob a bank — it knows how, but human training taught it not to help.
+
+      Once training is done the model is mostly **frozen** (the "P" in GPT =
+      pre-trained). What emerges from this process surprises even the model's
+      creators — capabilities that were never explicitly programmed.
+
+      ### Emergent capabilities
+
+      When a model has seen enough text, it starts to understand higher-level
+      concepts: cause and effect, spatial relationships, analogical reasoning.
+      A model shown a diagram of scissors, string, egg, pot, and fire can
+      reason about what happens if you cut the string — without ever being
+      trained on that exact scenario.
+
+  - id: model-landscape
+    type: concept
+    title: The Model Landscape
+    content: |
+      ChatGPT started the revolution, but it is far from the only model. New
+      models are appearing constantly, varying wildly in capability and cost.
+
+      ### Model dimensions
+
+      | Dimension | Variations |
+      |-----------|-----------|
+      | **Speed** | Fast/cheap ↔ slow/capable |
+      | **Deployment** | Cloud API ↔ local/downloadable |
+      | **Cost** | Free/open-source ↔ commercial |
+      | **Specialisation** | General-purpose ↔ domain-specific |
+      | **Access** | API ↔ embedded co-pilot in a product |
+
+      > You generally get what you pay for. A free model may be a smart high
+      > school student in your basement rather than Einstein. The gap between
+      > GPT-3.5 and GPT-4 is massive.
+
+      ### Types of generative AI models
+
+      | Type | Input → Output | Example use |
+      |------|---------------|-------------|
+      | **Text-to-text** | Text → Text | Chat, code generation, summarisation |
+      | **Text-to-image** | Text → Image | DALL-E, Midjourney, Stable Diffusion |
+      | **Image-to-text** | Image → Description | Photo captioning, visual Q&A |
+      | **Speech-to-text** | Audio → Transcript | Meeting notes, subtitles |
+      | **Text-to-audio** | Text → Music/sound | Audio generation |
+      | **Text-to-video** | Text → Video | Sora, Runway |
+
+      **Multimodal** products combine multiple model types — the ChatGPT mobile
+      app can handle text, images, and voice in a single conversation.
+
+  - id: quiz-fundamentals
+    type: challenge
+    kind: multiple-choice
+    title: "Check Your Understanding — AI Fundamentals"
+    question: "What does 'pre-trained' mean in the context of a large language model?"
+    choices:
+      - id: a
+        text: The model was trained by professional AI researchers before being released to the public
+      - id: b
+        text: The model learned from a massive corpus of text during a training phase and is now mostly frozen — it learns from that data, not from individual conversations
+        correct: true
+      - id: c
+        text: The model requires pre-training from the user before it can answer questions
+      - id: d
+        text: The model was trained on a pre-selected set of approved topics only
+    explanation: |
+      "Pre-trained" (the P in GPT) means the model underwent a large-scale
+      training phase on internet-scale text data. After training, the parameters
+      are mostly frozen. The model doesn't learn from your conversations — it
+      draws on patterns it absorbed during training.
+
+  - id: mindset
+    type: concept
+    title: "The Right Mindset for the AI Era"
+    content: |
+      People and organisations tend to fall into one of three mindsets when
+      confronted with AI. Only one is useful.
+
+      ### The mindset spectrum
+
+      | Mindset | Belief | Problem |
+      |---------|--------|---------|
+      | **Denial** | "AI can't do my job" / "We don't have time for this" | Dangerous. You will be replaced not by AI but by people using AI. |
+      | **Panic** | "AI will take my job no matter what" | Unhelpful. Leads to paralysis rather than adaptation. |
+      | **Balanced & positive** | "AI will make me and my team insanely productive" | The only mindset that prepares you to thrive. |
+
+      ### What the balanced mindset feels like
+
+      - You gain **superpowers**: idea to result in a fraction of the time
+      - You focus on *what* you want to achieve, not the grunt work of building it
+      - You learn faster — AI is like having an awesome mentor on call 24/7
+      - You are less likely to lose your job or your company
+
+      ### Are human roles still needed?
+
+      For most roles, yes. Someone with domain knowledge still needs to:
+
+      - Decide *what* to ask the AI
+      - Formulate the prompt and provide the right context
+      - Evaluate whether the result is correct and trustworthy
+      - Make judgment calls on legal compliance, data security, and trust
+
+      > AI models can be absolutely brilliant — and occasionally terribly wrong.
+      > They can hallucinate: produce confident-sounding but completely false
+      > information. The **human expert** compensates for these weaknesses.
+
+      Think of AI as a genius colleague with some personal quirks. Your job is
+      to know when your genius colleague is "drunk" and shouldn't be trusted.
+
+  - id: prompt-engineering-basics
+    type: concept
+    title: "Prompt Engineering: The Core Skill"
+    content: |
+      Prompt engineering (or *prompt design*) is the skill of crafting inputs
+      that produce useful outputs from an AI model. It applies whether you are
+      a casual user or a product developer.
+
+      ### Why context is everything
+
+      Compare these two prompts for planning a workshop:
+
+      **Weak prompt:**
+      > "Help me plan a workshop."
+
+      No matter how smart the AI, without context it can only give vague,
+      generic recommendations.
+
+      **Strong prompt:**
+      > "I'm running a 2-hour workshop for 15 mid-level engineers at a fintech
+      > startup. The goal is to align the team on our Q3 architecture decisions.
+      > We have a whiteboard and post-its. Help me plan an agenda."
+
+      The second prompt gives the AI the context it needs to be genuinely useful.
+
+      ### The iterative approach
+
+      Good prompts are rarely written in one shot. The typical pattern:
+
+      1. Write a prompt
+      2. Look at the result
+      3. Add a follow-up or refine the original
+      4. Repeat until you get a good result
+
+      This is normal — not a sign that you're doing it wrong.
+
+      ### The interview technique
+
+      Instead of providing all context upfront, ask the AI to interview you:
+
+      > "I need help planning a workshop. Ask me whatever you need to know in
+      > order to help me, then propose an agenda."
+
+      This is powerful because the AI knows what information it needs better
+      than you do upfront. A hybrid works well: provide some context, then add
+      *"ask me if you need more information."*
+
+  - id: prompt-techniques
+    type: concept
+    title: "Practical Prompting Techniques"
+    content: |
+      Beyond basic context-setting, several techniques reliably improve results.
+
+      ### 1. Assign a role
+
+      Tell the AI what persona to adopt:
+
+      > "You are a senior software architect with 15 years of experience in
+      > distributed systems. Review this design and identify weaknesses."
+
+      Roles prime the model to draw on a specific slice of its knowledge and
+      to respond with appropriate depth and vocabulary.
+
+      ### 2. Constrain the output format
+
+      Be explicit about what you want back:
+
+      > "Give me a 5-bullet summary. Each bullet should be one sentence."
+      > "Respond in JSON with keys: name, summary, risk_level."
+      > "Write this as a professional email, under 150 words."
+
+      ### 3. Control verbosity: the "just say OK" technique
+
+      When you want the AI to listen and not interrupt:
+
+      > "Always respond with just the word 'OK' unless I ask you a question.
+      > I'm going to share my thinking and want you to hold back until I ask
+      > for feedback."
+
+      Useful for brain-dumping ideas, then asking for synthesis at the end.
+
+      ### 4. Chain prompts deliberately
+
+      Break complex tasks into stages. Let the AI produce a draft, review it,
+      then prompt for revision:
+
+      > First prompt: "Outline the main sections of this blog post."
+      > Second prompt: "Now write a first draft of section 2."
+      > Third prompt: "Make the tone more conversational and cut it by 20%."
+
+      ### 5. Ask it to ask you
+
+      The interview technique (from the previous slide) works for any complex
+      task where you're not sure what context to provide upfront.
+
+      > **The main bottleneck is not the AI's capability — it is your prompt
+      > engineering skill. Improving this skill has a direct, immediate impact
+      > on the quality of everything you use AI for.**
+
+  - id: quiz-prompting
+    type: challenge
+    kind: multiple-choice
+    title: "Check Your Understanding — Prompting"
+    question: |
+      You ask an AI to help you plan a marketing campaign and the result is generic and unhelpful. What is the most likely cause and the best fix?
+    choices:
+      - id: a
+        text: The model is not capable enough — try a more powerful model
+      - id: b
+        text: Your prompt lacked context. Add details about your product, audience, budget, goals, and timeline
+        correct: true
+      - id: c
+        text: AI models cannot help with marketing — this is outside their capabilities
+      - id: d
+        text: You should use a specialised marketing AI rather than a general-purpose model
+    explanation: |
+      Generic results almost always come from generic prompts. The AI is only
+      as useful as the context you give it. Adding specific details — product,
+      audience, budget, timeline, goals — transforms a vague answer into a
+      genuinely useful one. Switching models is rarely the right first move.
+
+  - id: ai-as-colleague
+    type: concept
+    title: "AI as Your Colleague"
+    content: |
+      The most useful frame for working with AI is to think of it as a
+      **genius colleague** — brilliant, knowledgeable, tireless, but with
+      specific quirks and limitations you need to understand.
+
+      ### What your AI colleague can do
+
+      | Role | How AI helps |
+      |------|-------------|
+      | Doctor | Diagnose rare conditions, research treatment options |
+      | Lawyer | Legal research, contract review — freeing time for client relationships |
+      | Teacher | Grade tests, generate course content, give students individual support |
+      | Developer | Write code, debug, explain unfamiliar patterns, generate tests |
+      | Anyone | Ask "I work as X — how can you help me?" and let it surprise you |
+
+      ### Knowing when to trust the output
+
+      Your AI colleague can be wrong — confidently, fluently wrong. Build the
+      habit of:
+
+      - **Verifying** important facts from authoritative sources
+      - **Spot-checking** code before shipping it
+      - **Treating outputs as a strong first draft**, not a final product
+      - **Recognising** when a task requires human judgment (legal, ethical, safety-critical)
+
+      ### The magic formula
+
+      > **Human + AI > AI alone > Human alone** (for most intellectual tasks)
+
+      The combination of your domain expertise, judgment, and accountability
+      with the AI's breadth, speed, and tirelessness is where the real leverage lies.
+
+  - id: models-vs-products
+    type: concept
+    title: "Models vs Products — and Building with APIs"
+    content: |
+      As a user or developer, it's important to understand the difference
+      between the **model** and the **product** built on top of it.
+
+      ### The stack
+
+      ```
+      You
+       ↕
+      Product (ChatGPT, Claude.ai, Copilot, your app...)
+       ↕
+      Model API (GPT-4o, Claude, Gemini...)
+       ↕
+      Underlying model weights (frozen after training)
+      ```
+
+      The product adds:
+      - A user interface
+      - Conversation history (the model itself is stateless per call)
+      - Custom capabilities, plugins, integrations
+      - Rate limiting, billing, access controls
+
+      ### Building AI-powered products
+
+      As a developer, you call models directly via APIs — inserting intelligence
+      into your own product:
+
+      ```python
+      # Minimal OpenAI API call
+      response = client.chat.completions.create(
+          model="gpt-4o",
+          messages=[{"role": "user", "content": "Your prompt here"}]
+      )
+      print(response.choices[0].message.content)
+      ```
+
+      Example use cases:
+      - **E-learning platform** — chatbot that answers questions about courses
+      - **Recruitment tool** — automatically evaluate CVs against a job description
+      - **Any product** — add an intelligent layer without building your own model
+
+      Prompt engineering is just as critical in product development as in casual
+      use — the prompt you embed in your product determines the quality of every
+      user interaction.
+
+  - id: agents-preview
+    type: concept
+    title: "The Next Frontier: Autonomous Agents"
+    content: |
+      The next evolution beyond chat-based AI is **autonomous agents** — AI
+      entities that run on their own, equipped with tools, rather than just
+      responding to prompts.
+
+      ### The shift in interaction model
+
+      | Chat-based AI | Autonomous agent |
+      |--------------|-----------------|
+      | You prompt, it responds | You set a goal, it runs |
+      | Single-turn or multi-turn conversation | Long-running task execution |
+      | You stay in the loop for every step | Operates independently, reports back |
+      | Tools: none (text only) | Tools: internet, files, APIs, messages, money... |
+
+      ### The good leader analogy
+
+      With an autonomous agent, you do what a good leader does with a team:
+
+      > Give them a high-level mission and the tools needed to accomplish it.
+      > Then open the door and let them run their own show — without
+      > micromanagement.
+
+      ### Why prompt engineering matters even more for agents
+
+      When an agent can take real actions in the real world — send emails, spend
+      money, modify files, make API calls — the quality of your initial mission
+      statement matters enormously. A well-crafted instruction leads to valuable
+      autonomous work. A poorly crafted one leads to unintended consequences that
+      may be hard to reverse.
+
+      > Prompt engineering started as a skill for getting better chatbot answers.
+      > It is becoming the skill that determines what autonomous AI systems do
+      > in the world on your behalf.
+
+  - id: flashcard-review
+    type: challenge
+    kind: flashcards
+    title: "Prompt Engineering — Flashcard Review"
+    cards:
+      - front: What is the difference between traditional AI and generative AI?
+        back: Traditional AI classifies or retrieves existing content (recommendations, fraud detection, search). Generative AI creates new, original content — text, images, code, audio, video.
+      - front: How does an LLM generate text?
+        back: It predicts the next most likely word/token given everything that came before. It repeats this, appending each output to the input, until the response is complete.
+      - front: What is RLHF and why does it matter?
+        back: Reinforcement Learning from Human Feedback. Thousands of hours of humans evaluating model outputs and giving feedback. It teaches the model what it should and should not help with — e.g. refusing to assist with crimes.
+      - front: What is hallucination in an LLM?
+        back: When the model generates confident-sounding but factually incorrect information. Models can be fluently wrong. Always verify important claims from authoritative sources.
+      - front: What is the single biggest bottleneck when using AI?
+        back: Not the model's capability — your prompt engineering skill. The quality of what you put into the context window determines the quality of what comes out.
+      - front: What is the "interview technique" in prompting?
+        back: Instead of providing all context upfront, you ask the AI to interview you — "ask me whatever you need to know to help me." The AI surfaces what information it needs, which is often more efficient than guessing upfront.
+      - front: What is the difference between a model and a product?
+        back: The model is the underlying neural network (e.g. GPT-4o). The product (e.g. ChatGPT) wraps the model with a UI, conversation history, integrations, and additional capabilities. As a developer you can call the model directly via API.
+      - front: Why does prompt engineering matter more for autonomous agents than for chat?
+        back: Agents take real actions in the world (spend money, send messages, modify files). A poorly crafted mission leads to real, potentially hard-to-reverse consequences. The initial prompt is the only instruction the agent gets.
+
+  - id: final-quiz
+    type: challenge
+    kind: multiple-choice
+    title: "Final Check — Putting It All Together"
+    question: |
+      You are a doctor who wants to use AI to help diagnose rare conditions. Which approach best reflects the "human + AI" collaboration model?
+    choices:
+      - id: a
+        text: Let the AI make diagnoses and share them directly with patients to save time
+      - id: b
+        text: Use the AI to surface rare conditions you might not have considered, then apply your own expertise to evaluate, verify, and decide
+        correct: true
+      - id: c
+        text: Avoid AI for medical use entirely — it hallucinates too often to be trustworthy
+      - id: d
+        text: Use AI only for administrative tasks like scheduling, not clinical reasoning
+    explanation: |
+      The magic of human + AI is the combination. AI can surface rare conditions
+      that a doctor might not immediately consider — drawing on patterns from
+      vast medical literature. The human expert then applies domain knowledge,
+      judgment, and accountability to evaluate and act on those suggestions.
+      Neither the AI alone nor the human alone is as effective as the pair.

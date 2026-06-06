@@ -1,0 +1,298 @@
+id: harness-engineering
+title: "Harness Engineering"
+description: Understand how AI agent architectures evolved from prompt engineering through context engineering to the new paradigm of harness engineering — and why it matters.
+icon: git-branch
+version: "1.0"
+tags:
+  - AI
+  - Agents
+  - Context Engineering
+  - Harness Engineering
+  - Architecture
+
+steps:
+
+  - id: intro-video
+    type: concept
+    title: "Watch: The Evolution of Agent Architectures"
+    content: |
+      This course is based on Caleb Bright's breakdown of harness engineering —
+      one of the most clarifying explanations of how AI coding agents actually
+      work under the hood.
+
+      Watch the full video first, then work through the slides to break it down
+      concept by concept.
+
+      https://www.youtube.com/watch?v=1a1VXDdIyrk
+
+      By the end of this course you will be able to:
+
+      - Define **prompt engineering**, **context engineering**, and **harness engineering** — and explain how they relate
+      - Describe the key limitations that drove each evolution
+      - Explain what an **agent loop** is and why it produces better results
+      - Recognise harness engineering in tools like Cursor, Roo, and Anthropic's demos
+
+  - id: prompt-engineering
+    type: concept
+    title: "Layer 1: Prompt Engineering"
+    content: |
+      The earliest approach to getting useful output from LLMs was **prompt
+      engineering** — crafting the text you send to the model carefully enough
+      that the response is reliable and useful.
+
+      ### What it is
+
+      Prompt engineering is about *what you say* to the model and *how you say
+      it*:
+
+      - Writing clear, specific instructions
+      - Giving examples (few-shot prompting)
+      - Defining the model's persona ("You are a senior software engineer…")
+      - Structuring the output format you want
+
+      ### Why it wasn't enough on its own
+
+      In 2022, ChatGPT launched with a context window of only **~4,000 tokens**.
+      That's roughly 3,000 words — enough for a conversation, but not enough to
+      work on a real codebase.
+
+      A well-crafted prompt could produce a good *single response*, but for
+      anything requiring multiple steps, file access, or sustained reasoning,
+      a one-shot prompt just produced sketchy, incomplete results.
+
+      > Prompt engineering defines *who the agent is* and *what its persona is*.
+      > It remains a component of every modern agent — but it is now the
+      > smallest layer in the stack.
+
+  - id: context-engineering
+    type: concept
+    title: "Layer 2: Context Engineering"
+    content: |
+      As the limitations of pure prompt engineering became clear, developers
+      began asking a different question: **how do we manage the context window
+      more efficiently?**
+
+      This gave rise to **context engineering** — a set of techniques for
+      dynamically loading only the information the model needs, at the moment
+      it needs it.
+
+      ### The three pillars of context engineering
+
+      | Technique | What it does |
+      |-----------|-------------|
+      | **Tool calling** | Agent reads only the specific files relevant to the current task; creates external actions |
+      | **MCP (Model Context Protocol)** | Adds vendor-specific capabilities on top of the base model |
+      | **RAG (Retrieval-Augmented Generation)** | Connects custom databases so relevant data is available on demand |
+
+      ### Why it was transformative
+
+      These techniques made the first wave of serious coding agents possible.
+      Tools like **Cursor**, **Windsurf**, **Cline**, **Roo**, and **Aider**
+      all adopted tool calling for context engineering — and they were
+      genuinely good tools that got real work done.
+
+      As underlying models grew their context windows (from 4K → 32K → 128K+
+      tokens), context engineering let agents take on progressively longer tasks.
+
+  - id: context-engineering-limits
+    type: concept
+    title: "The Limits of Context Engineering"
+    content: |
+      Context engineering was powerful, but it hit a fundamental ceiling for
+      very long-duration tasks.
+
+      ### The summarisation trap
+
+      When a task runs long enough that the context window starts to fill up,
+      agents using context engineering resort to **context summarisation** —
+      compressing previous work to make room for new input.
+
+      This creates serious problems:
+
+      - The agent may **assume a task is already finished** after summarising it
+      - It may **oversimplify** what was done, skipping verification steps
+      - Partially completed features get marked as done
+      - Bugs go untested because the agent "remembers" testing work it never did
+
+      ### What this looks like in practice
+
+      > You ask an agent to clone an entire website. A few hours in, the context
+      > fills. The agent summarises, assumes some features are complete, and
+      > continues. You end up with a website where some buttons don't work and
+      > features are only half-implemented.
+
+      The elastic, self-managing context window gave the *appearance* of
+      long-range capability — but wasn't truly reliable for large-scope tasks.
+
+      ### Early workarounds
+
+      Developers experimented with:
+      - **Sub-agents** — hierarchical context management where a coordinator spawns specialised agents
+      - **Agent swarms** — multiple agents each with their own fresh context window
+
+      These worked, but were complex to orchestrate. Something better was needed.
+
+  - id: quiz-three-layers
+    type: challenge
+    kind: multiple-choice
+    title: "Check Your Understanding — The Three Layers"
+    question: "A developer asks a coding agent to clone an entire website. The agent runs for hours, then produces a result where half the buttons don't work. What is the most likely root cause?"
+    choices:
+      - id: a
+        text: The prompt was poorly written — prompt engineering would have fixed this
+      - id: b
+        text: Context summarisation caused the agent to falsely assume some tasks were complete
+        correct: true
+      - id: c
+        text: The model's context window was too small to hold any code at all
+      - id: d
+        text: Tool calling was not available for this type of task
+    explanation: |
+      This is the classic symptom of context engineering's limitation for long
+      tasks. As the context fills, the agent summarises — and in doing so may
+      assume work is done that was never actually completed or tested.
+
+  - id: harness-engineering-intro
+    type: concept
+    title: "Layer 3: Harness Engineering"
+    content: |
+      **Harness engineering** emerged in early 2026 to describe something that
+      developers had been converging toward through sub-agents and swarms: a
+      structured *environment* that controls how an agent runs, rather than
+      just what it is told.
+
+      ### The core insight: loops with fresh context
+
+      Instead of one long continuous run where the context grows and eventually
+      degrades, harness engineering introduces **loops**:
+
+      1. The agent starts each iteration with a **fresh, clean context**
+      2. Each iteration has a **strict rule** about how to start and finish
+      3. The agent picks **one task** from a requirements document, completes it, tests it, and documents it
+      4. The loop repeats until all tasks are done
+
+      ### Why this works
+
+      - No summarisation trap — each loop starts fresh
+      - Each task is **small and bounded** — the agent can't "assume" it's done
+      - Each step is **tested and documented** before moving on
+      - The orchestration layer (the harness) enforces quality gates
+
+      > Think of the harness as a factory floor, not a conversation.
+      > The agent is a worker on an assembly line — each station is clean,
+      > the rules are explicit, and nothing moves forward until the current
+      > step passes inspection.
+
+  - id: harness-architecture
+    type: concept
+    title: "What a Harness Looks Like in Practice"
+    content: |
+      The elegant surprise of harness engineering is how **simple** the
+      architecture actually is. Several open-source examples demonstrate this.
+
+      ### The typical harness pattern
+
+      ```
+      1. Generate a large requirements document (PRD / task list)
+      2. Convert the task list to a structured format (e.g. JSON)
+      3. LOOP:
+           a. Select ONE unfinished task
+           b. Give the agent a fresh prompt + fresh context for that task
+           c. Agent implements the task
+           d. Agent tests and documents the result
+           e. Mark task complete in the requirements document
+         UNTIL all tasks complete
+      ```
+
+      ### Real-world examples
+
+      **Ralf** — took over the internet for how effective (and simple) it was:
+      - Creates a production requirements document
+      - Converts it to a JSON task list
+      - Loops feature-by-feature until completion
+      - Repository is remarkably small and readable
+
+      **Anthropic's simple harness demo**:
+      - Lightweight, minimal environment
+      - Same loop-based architecture
+      - Open-sourced as a reference implementation
+
+      **Cursor's cloud agents**:
+      - Run entirely in the cloud — you can close your laptop and the job continues
+      - Creates a pull request when finished
+      - Integrates with Slack so you can trigger agents via message
+
+      ### The key observation
+
+      > The harness repository is always *tiny*. The power comes from the loop
+      > structure, not from complex orchestration code.
+
+  - id: how-layers-relate
+    type: concept
+    title: "How the Three Layers Work Together"
+    content: |
+      A critical clarification: **harness engineering does not replace prompt
+      or context engineering**. It *encompasses* them.
+
+      ### The stack
+
+      | Layer | Role in a modern agent |
+      |-------|----------------------|
+      | **Prompt engineering** | Defines who the agent is; gives it persona and baseline instructions. Still present in every agent's system prompt. |
+      | **Context engineering** | Manages what information is loaded into each iteration. Tool calling, MCP, RAG still apply — now scoped to one task at a time. |
+      | **Harness engineering** | Defines the environment: the loop, the task selection rules, the quality gates, the fresh-context constraint. |
+
+      ### The paradigm shift
+
+      The shift is not about better prompts or smarter context loading. It's
+      about **changing the environment** the agent operates in:
+
+      - From: one long continuous run where the agent manages itself
+      - To: a series of bounded iterations, each governed by explicit rules
+
+      When you look at open-source agents like Cline today, you see all three
+      layers working together — a well-written system prompt (prompt
+      engineering), intelligent file reading (context engineering), and a
+      loop-based task structure (harness engineering).
+
+  - id: flashcard-review
+    type: challenge
+    kind: flashcards
+    title: "Three Layers — Flashcard Review"
+    cards:
+      - front: What is prompt engineering?
+        back: Crafting the text sent to the model — instructions, persona, examples, and output format. It defines who the agent is. Present in every agent but now the smallest layer.
+      - front: What is context engineering?
+        back: Dynamically managing what information is loaded into the context window. Key techniques are tool calling (read only relevant files), MCP (vendor capabilities), and RAG (on-demand data retrieval).
+      - front: What is harness engineering?
+        back: Defining the environment the agent operates in — specifically a loop where each iteration gives the agent a fresh context, a single bounded task, and a quality gate before moving on.
+      - front: What is the "summarisation trap" in context engineering?
+        back: When a long-running agent's context fills up, it compresses (summarises) previous work to continue. This can cause it to falsely mark tasks as done or skip testing — producing incomplete results.
+      - front: Why is the harness loop so effective?
+        back: Each iteration starts with a fresh, clean context. Tasks are small and bounded. The agent tests and documents each step before moving on. There is no context degradation over time.
+      - front: Name two real-world examples of harness engineering in production.
+        back: Ralf (creates a PRD, loops feature-by-feature, tiny repo) and Cursor's cloud agents (run off-device, create PRs, integrate with Slack).
+      - front: Does harness engineering replace prompt engineering?
+        back: No. Harness engineering encompasses prompt and context engineering. A modern agent still has a well-written system prompt (prompt engineering) and smart context loading (context engineering) inside each harness iteration.
+
+  - id: final-quiz
+    type: challenge
+    kind: multiple-choice
+    title: "Final Check — Harness Engineering"
+    question: "Which of the following best describes what makes harness engineering different from context engineering?"
+    choices:
+      - id: a
+        text: Harness engineering writes better prompts that prevent the agent from making mistakes
+      - id: b
+        text: Harness engineering uses larger context windows so summarisation is never needed
+      - id: c
+        text: Harness engineering changes the environment — running the agent in a loop with fresh context and bounded tasks at each iteration, rather than one long continuous run
+        correct: true
+      - id: d
+        text: Harness engineering replaces tool calling and RAG with a single unified memory system
+    explanation: |
+      The key insight is that harness engineering is an environmental change,
+      not a prompt or context improvement. By running the agent in a structured
+      loop — fresh context, one task, test-and-document, repeat — you sidestep
+      the summarisation trap entirely and get reliable results on long-duration
+      tasks.

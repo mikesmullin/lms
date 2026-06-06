@@ -1,0 +1,373 @@
+id: context-engineering
+title: "Context Engineering"
+description: Learn the spec-first, research-plan-implement workflow that makes coding agents reliable in large, complex codebases — from intentional compaction to keeping context under 40%.
+icon: brain
+version: "1.0"
+tags:
+  - AI
+  - Agents
+  - Context Engineering
+  - Workflows
+  - Engineering
+
+steps:
+
+  - id: intro-video
+    type: concept
+    title: "Watch: Advanced Context Engineering"
+    content: |
+      This course is based on a talk by Dex Horthy (founder of HumanLayer, YC
+      F24) at AI Engineer 2025. It's one of the most practical, hard-won
+      accounts of what it actually takes to use coding agents reliably in big,
+      complex, production codebases.
+
+      https://www.youtube.com/watch?v=IS_y40zY-hc
+
+      ### What this course covers
+
+      - Why simple "shout at the agent" workflows fail at scale
+      - The **spec-first development** mindset that unlocks production quality
+      - **Intentional compaction** — writing progress files instead of relying on `/compact`
+      - The **Research → Plan → Implement** loop and why it works
+      - Why keeping context utilization **under 40%** is a superpower
+      - How sub-agents help with context control (not just parallelism)
+      - What code review is *actually* for — and how specs replace it
+
+  - id: the-problem
+    type: concept
+    title: "Why Coding Agents Fail at Scale"
+    content: |
+      Coding agents work well for prototypes. They struggle badly for complex,
+      brownfield (existing) codebases.
+
+      ### The Stanford study findings
+
+      A study of 100,000 developers across enterprises and startups found that:
+
+      - AI-assisted engineering leads to significant **rework** — often half the
+        generated code gets thrown away
+      - For **complex or brownfield tasks**, AI assistance can be
+        **counterproductive** — actually slowing teams down
+      - The root cause: agents produce **slop** when they don't have enough
+        context about how the system actually works
+
+      ### The vibe-coding trap
+
+      The most naive pattern — *"shout back and forth until you run out of
+      context or give up"* — is extremely common and extremely ineffective:
+
+      - No shared understanding of what's being built
+      - Agent goes off-track; you correct; it goes off-track again
+      - Context fills up; quality degrades; you start over
+      - Result: sketchy prototypes that don't survive contact with production
+
+      > "It's good for prototypes. When we figure it out, we give it to the
+      > engineers and they build production." — Amjad, Replit CEO
+
+      The goal of advanced context engineering is to break through this ceiling.
+
+  - id: spec-first-development
+    type: concept
+    title: "Spec-First Development"
+    content: |
+      The breakthrough insight that unlocks production-quality coding agents is
+      **spec-first development**: write the specification before you write (or
+      generate) any code.
+
+      ### How it emerged
+
+      Dex was working with one of the best AI coders he'd encountered — someone
+      shipping 20,000-line PRs of complex Go code (race conditions, shutdown
+      ordering, concurrent systems) every few days. Nobody could review that code.
+
+      The only way to stay aligned was to **read and approve the spec** before
+      any code was written. Over 8 weeks the team made this uncomfortable
+      transformation — and then they were flying.
+
+      ### The spec-first principle
+
+      > "I haven't opened a non-markdown file in an editor in almost two months."
+
+      The spec (the description of what you want the software to do) is the
+      important artifact — not the code. This mirrors how compiled languages
+      work: you don't check in the compiled binary; you check in the source.
+
+      In the AI era, the spec *is* the source.
+
+      ### What this changes
+
+      | Without spec-first | With spec-first |
+      |--------------------|-----------------|
+      | Review 2,000 lines of code | Review 200 lines of spec |
+      | Catch bugs after they're written | Catch design errors before any code runs |
+      | Agent goes off-track mid-task | Agent has a verified plan to follow |
+      | Team loses shared understanding | Mental alignment maintained via specs |
+
+  - id: intentional-compaction
+    type: concept
+    title: "Intentional Compaction"
+    content: |
+      When context fills up, the naive response is to use `/compact` (the
+      agent's built-in context compression) or just start over with the same
+      prompt.
+
+      Both are suboptimal. **Intentional compaction** is better.
+
+      ### Why `/compact` is inadequate
+
+      `/compact` lets the model decide what to summarise and what to discard.
+      The model doesn't know what *you* care about. Critical file paths, line
+      numbers, and implementation decisions get lost.
+
+      ### The intentional compaction pattern
+
+      Instead of compacting, **write a structured progress file** before
+      switching to a fresh context. This file becomes the onboarding document
+      for the next agent session.
+
+      A good progress file includes:
+
+      - **What we're building** — the goal, in one paragraph
+      - **What's been done** — completed steps with file names and line numbers
+      - **What's in progress** — current task state
+      - **What's next** — remaining tasks in order
+      - **Key decisions made** — anything non-obvious that influenced the approach
+      - **Known landmines** — things that were tried and didn't work
+
+      > The progress file is your agent's memory. Write it like you're handing
+      > off to a new engineer on their first day — because you are.
+
+      ### The onboarding payoff
+
+      When you start a new session, you give the agent the progress file as
+      context. It picks up exactly where you left off, without re-reading
+      hundreds of files to reconstruct state.
+
+  - id: quiz-compaction
+    type: challenge
+    kind: multiple-choice
+    title: "Check Your Understanding — Compaction"
+    question: "You are 70% through a complex implementation task and your context window is getting full. What is the best approach?"
+    choices:
+      - id: a
+        text: Use /compact and continue — the model will decide what to keep
+      - id: b
+        text: Start a completely fresh context with your original prompt
+      - id: c
+        text: Write a structured progress file with file names, line numbers, decisions made, and next steps — then start a fresh context and load that file
+        correct: true
+      - id: d
+        text: Keep going past 100% context — most models handle overflow gracefully
+    explanation: |
+      Intentional compaction means YOU decide what gets preserved, not the
+      model. A structured progress file with file names, line numbers, decisions
+      made, and next steps lets the next agent session pick up exactly where you
+      left off without losing critical context.
+
+  - id: context-quality
+    type: concept
+    title: "What Makes a Good Context Window"
+    content: |
+      LLMs are **pure functions**: the only lever that improves output quality
+      (beyond changing the model) is the quality of what you put into the
+      context window.
+
+      In a coding agent loop, the agent constantly decides:
+      - What is the right next tool to call?
+      - What is the right next edit to make?
+
+      The *only* thing that determines how well it answers those questions is
+      what's in the context window.
+
+      ### The quality hierarchy
+
+      Ranked from most damaging to least:
+
+      | Problem | Impact |
+      |---------|--------|
+      | **Bad information** — wrong understanding of how the system works | Worst. Can cause thousands of bad lines of code. |
+      | **Missing information** — agent doesn't know relevant files or patterns | Bad. Agent wastes tokens searching or makes assumptions. |
+      | **Too much noise** — irrelevant files, giant JSON blobs from MCP tools | Manageable but wasteful. |
+
+      ### The corollary error hierarchy
+
+      > A bad line of code is a bad line of code.
+      > A bad line of a plan can be hundreds of bad lines of code.
+      > A bad line of research — a misunderstanding of how the system works —
+      > can be thousands of bad lines of code.
+
+      Optimise context for: **correctness**, **completeness**, and **size**.
+      The less context you consume to do the work, the better your results.
+
+  - id: research-plan-implement
+    type: concept
+    title: "The Research → Plan → Implement Loop"
+    content: |
+      The core workflow that makes advanced context engineering reliable is a
+      **three-phase loop**, each phase in its own focused context window.
+
+      ### Phase 1: Research
+
+      **Goal:** Understand how the system works and where the relevant code lives.
+
+      The research prompt asks the agent to:
+      - Find the relevant files and line numbers
+      - Understand how data flows across components
+      - Identify where a bug is located or where a feature needs to hook in
+
+      **Output:** A research document with exact file names and line numbers.
+      The next agent reading this doesn't have to search 100 files — it knows
+      exactly where to look.
+
+      ### Phase 2: Plan
+
+      **Goal:** Produce a complete, explicit implementation plan *before* writing code.
+
+      The planning prompt asks for:
+      - Every file that will change
+      - The specific snippets that will be modified
+      - Explicit test and verification steps for each change
+
+      **Output:** A plan document. If the plan is good, the implementation
+      will be good. If you find yourself shouting at the agent during
+      implementation, the plan was bad.
+
+      ### Phase 3: Implement
+
+      **Goal:** Execute the plan with a fresh context window per task.
+
+      - Keep context utilization **under 40%**
+      - Update the plan as tasks complete ("This is done, on to the next phase")
+      - Start a new context window when moving to the next phase
+
+      ### Why this works
+
+      Each phase produces a **compact, high-signal document** that fits in a
+      fraction of a context window. The next phase loads only that document —
+      not the full history of searching and reading that produced it.
+
+  - id: context-under-40
+    type: concept
+    title: "The 40% Context Rule"
+    content: |
+      One of the most actionable insights from this workflow: **keep context
+      utilization under 40%**.
+
+      ### Why 40%?
+
+      You have roughly 170,000 tokens in a typical large context window. The
+      less of those you consume doing the work, the better results you get.
+
+      Two reasons:
+
+      1. **Signal degrades as context fills** — the model attends less precisely
+         to early context as the window grows. Keeping utilization low means
+         the important context stays salient.
+
+      2. **Frequent resets keep context clean** — rather than one long session
+         where noise accumulates, you work in short, focused sessions with
+         high-quality context every time.
+
+      ### In practice
+
+      - After research: write the research doc, open new context with just that doc
+      - After planning: write the plan, open new context with just the plan + relevant research
+      - During implementation: when a task is done, mark it done, open new context for the next task
+
+      > Think of 40% as your yellow line. Cross it and you're in degraded-mode
+      > territory. Reset before you get there.
+
+      ### Sub-agents for inline context control
+
+      Sub-agents aren't just about parallelism — they're a context isolation
+      tool. When you need to understand how information flows across multiple
+      components, a sub-agent can do the searching and return a compact summary.
+      The parent agent gets the answer without the context burden of all that
+      reading.
+
+      The ideal sub-agent response is a **compact, high-signal summary** —
+      file names, line numbers, relevant snippets — not raw search output.
+
+  - id: code-review-reimagined
+    type: concept
+    title: "What Code Review Is Actually For"
+    content: |
+      When shipping AI-generated code, the traditional code review process
+      breaks down: you can't meaningfully review a 20,000-line PR every few days.
+
+      ### The real purpose of code review
+
+      Code review isn't primarily about catching bugs. It's about **mental
+      alignment** — keeping the team aware of how the system is changing and
+      why, as it evolves over time.
+
+      ### Specs replace code review
+
+      A 200-line implementation plan is:
+      - **Readable** in a few minutes
+      - **Reviewable** before any code runs
+      - Able to **catch design errors** before they become thousands of lines of code
+
+      If the plan is correct, the code will be correct. You can catch problems
+      early and maintain shared understanding — the actual goals of code review
+      — without reading every line of generated code.
+
+      ### The workflow in practice
+
+      ```
+      Research doc   →   Human reviews research
+           ↓
+      Plan doc       →   Human reviews plan
+           ↓
+      Implementation →   Human reviews diff (smaller, has context)
+           ↓
+      PR + merge
+      ```
+
+      The human is a **reviewer and decision-maker at each phase**, not a
+      passive watcher. This is what makes spec-first development work in teams.
+
+  - id: flashcard-review
+    type: challenge
+    kind: flashcards
+    title: "Advanced Context Engineering — Flashcard Review"
+    cards:
+      - front: What is spec-first development?
+        back: Writing the specification (what you want the software to do) before any code is written or generated. The spec is reviewed and approved; then the agent implements it. The spec is the important artifact, not the code.
+      - front: Why is /compact considered inadequate?
+        back: It lets the model decide what to keep and what to discard. Critical file paths, line numbers, and decisions get lost. Intentional compaction (writing a structured progress file yourself) gives you control over what the next session knows.
+      - front: What should a good progress/compaction file contain?
+        back: What we are building, what has been done (with file names and line numbers), what is in progress, what is next, key decisions made, and known approaches that did not work.
+      - front: What are the three phases of the research-plan-implement loop?
+        back: "Research: understand the codebase and find relevant files. Plan: produce an explicit implementation plan with test steps. Implement: execute the plan in focused context windows, keeping utilization under 40%."
+      - front: Why keep context utilization under 40%?
+        back: Signal degrades as context fills — the model attends less precisely to early context. Keeping utilization low keeps important context salient and results high-quality.
+      - front: What is the real purpose of code review in a spec-first workflow?
+        back: Mental alignment — keeping the team aware of how the system is changing and why. Specs (200 lines) are readable and reviewable before any code runs, achieving this goal better than reviewing 20,000-line PRs.
+      - front: How do sub-agents help with context control?
+        back: They act as context isolation tools. A sub-agent does the searching and reading, then returns a compact summary (file names, line numbers, key snippets). The parent agent gets the answer without the context burden of all that searching.
+      - front: What is the worst thing to have in your context window?
+        back: Bad information — a wrong understanding of how the system works. It can propagate into thousands of bad lines of code. Missing information is second worst; noise is third.
+
+  - id: final-quiz
+    type: challenge
+    kind: multiple-choice
+    title: "Final Check — Advanced Context Engineering"
+    question: "Your team is implementing a complex feature in a 300,000-line codebase using a coding agent. After the research phase, what is the most important thing to do before starting implementation?"
+    choices:
+      - id: a
+        text: Start implementing immediately while the research context is still warm
+      - id: b
+        text: Write the research findings to a document, have a human review it, then start a fresh context for planning
+        correct: true
+      - id: c
+        text: Use /compact to summarise the research and continue in the same context window
+      - id: d
+        text: Skip planning and go straight to implementation — planning slows you down
+    explanation: |
+      The research-plan-implement loop requires writing each phase's output to
+      a document and starting a fresh context for the next phase. Human review
+      of the research doc catches misunderstandings of the system before they
+      become thousands of bad lines of code. Planning before implementation
+      is what makes the implementation reliable — if the plan is good, the code
+      will be good.

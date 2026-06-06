@@ -1,0 +1,464 @@
+id: llm-fundamentals
+title: 'Large Language Models: How They Actually Work'
+description: Build a solid mental model of LLMs — tokens, inference, context windows, model families, and cost — without needing a math degree.
+icon: brain
+version: "1.0"
+tags:
+  - AI
+  - LLMs
+  - Tokens
+  - Inference
+  - Fundamentals
+
+steps:
+  - id: llm-intro-video
+    type: concept
+    title: 'Video: Explained in 8 Minutes'
+    content: |
+      Here is a quick, big-picture overview to build visual intuition.
+
+      https://www.youtube.com/watch?v=LPZh9BOjkQs
+
+      The remaining slides will break down each concept.
+
+  - id: what-is-a-token
+    type: concept
+    title: 'What is a Token? The Atom of LLM Text'
+    content: |
+      Everything inside a large language model is denominated in **tokens** — not words, not characters.
+
+      A token is a chunk of text, typically:
+      - **~4 characters** in English prose
+      - **1 token** for common short words ("the", "a", "is")
+      - **Multiple tokens** for rare or long words ("tokenization" ≈ 3–4 tokens)
+      - **More tokens per word** for code (symbols, camelCase identifiers split up)
+
+      Under the hood, the tokenizer converts your text into a sequence of **integer IDs** — numbers that map to vocabulary entries. The model never sees raw characters; it sees token IDs.
+
+      ![Infographic: how strings become token embeddings](courses/images/embeddings.png)
+
+      Why this matters:
+      - Every LLM API is **billed in tokens** (input + output)
+      - Context windows are **measured in tokens**, not words
+      - Generation speed is **tokens per second**
+      - Your intuition about "how long is this text?" needs to be calibrated to tokens, not words
+
+  - id: tokenization
+    type: concept
+    title: How Text Becomes Tokens (and Back)
+    content: |
+      The process of converting text to token IDs is called **tokenization**. Most modern LLMs use a variant of **Byte Pair Encoding (BPE)**.
+
+      How BPE works (simplified):
+      1. Start with a vocabulary of individual characters
+      2. Repeatedly merge the most frequently co-occurring pair of symbols into a single new token
+      3. After many rounds, common words and word-parts become single tokens; rare combinations stay split
+
+      ![Infographic: byte pair encoding](courses/images/byte-pair-enc.png)
+
+      The result is a vocabulary of ~50,000–100,000 tokens that efficiently covers common text while handling rare words by splitting them.
+
+      **Practical implications:**
+      - Capitalization matters: "Python" and "python" may tokenize differently
+      - Code is denser: `snake_case_variable` may split into 3–5 tokens
+      - Non-English languages often tokenize less efficiently than English (more tokens per word)
+      - Whitespace is part of tokens — a leading space changes the token ID
+
+  - id: token-intuition
+    type: concept
+    title: Building Token Intuition
+    content: |
+      Rough token equivalences to memorize:
+
+      | Text | Approximate tokens |
+      |------|--------------------|
+      | 1 word (average English) | 1.3 tokens |
+      | 750 words | ~1,000 tokens |
+      | A short novel (75,000 words) | ~100,000 tokens |
+
+      **Code is denser than prose.** A 100-line Python file might be 400–800 tokens depending on how terse or verbose it is.
+
+      **Why this intuition matters in practice:**
+      - Before sending a large document to an LLM, estimate its token count
+      - If you are building an agent loop, each turn consumes tokens — long loops get expensive fast
+      - When you hit a context limit, you need to know how much to trim
+
+      Most providers offer a tokenizer playground, API endpoint, or code library for assessing exact counts.
+
+  - id: quiz-tokens
+    type: challenge
+    kind: multiple-choice
+    title: 'Check Your Understanding — Tokens'
+    question: Approximately how many tokens does 750 words of English prose contain?
+    choices:
+      - id: a
+        text: 75 tokens
+      - id: b
+        text: 350 tokens
+      - id: c
+        text: 1,000 tokens
+        correct: true
+      - id: d
+        text: 7,500 tokens
+    explanation: |
+      The standard approximation is 1,000 tokens per 750 words — or roughly 1.3 tokens per word. This is a useful calibration point for estimating context window usage and API costs.
+
+  - id: what-is-inference
+    type: concept
+    title: What is Inference?
+    content: |
+      **Inference** is the act of running a prompt through a trained model and receiving a completion back.
+
+      ![Infographic: How infrence works](courses/images/inference.png)
+
+      Key properties of inference:
+      - **Stateless** — the model has no memory between API calls; each call is fully independent
+      - **Deterministic-ish** — at temperature 0, outputs are nearly (but not perfectly) deterministic due to floating-point non-determinism on GPUs
+      - **Expensive per token** — inference requires running the full model for each output token generated
+
+      The inference pipeline:
+      1. Your prompt text is tokenized into integer IDs
+      2. The token IDs pass through the transformer layers
+      3. The model outputs a probability distribution over the next token
+      4. A token is sampled from that distribution
+      5. The sampled token is appended to the context and the process repeats
+      6. Generation stops when the model produces a stop token or hits `max_tokens`
+
+      > Inference is stateless by design. Any state you need must be included in the prompt itself.
+
+  - id: how-llm-generates
+    type: concept
+    title: How an LLM Generates Text
+    content: |
+      LLMs are **autoregressive** — they generate text one token at a time, each token conditioned on all previous tokens.
+
+      The model does not "know" the full answer in advance. It computes each token by asking: *given everything before this, what token is most likely next?*
+
+      This has important implications:
+      - **Early tokens constrain later ones** — a bad early prediction can cascade
+      - **Generation is not retrieval** — the model is not looking up a stored answer; it is computing a new one each time
+      - **Longer outputs are slower** — each additional output token requires another full pass through the model
+      - **Input is cheaper than output** — reading a 10,000-token document is faster (and usually cheaper) than generating 10,000 tokens
+
+      This autoregressive nature is why LLMs are good at *continuation* tasks and why "chain of thought" (asking the model to reason step by step before answering) often improves accuracy — it gives the model more tokens to "work through" the problem.
+
+  - id: sampling-explained
+    type: concept
+    title: 'Sampling: Temperature, Top-p, and Randomness'
+    content: |
+      At each step, the model produces a **probability distribution** over the next token. **Sampling parameters** control how a token is chosen from that distribution.
+
+      **Temperature**
+      - Controls the sharpness of the distribution
+      - `temperature=0`: nearly deterministic — always pick the highest-probability token
+      - `temperature=1`: sample proportionally from the full distribution
+      - `temperature>1`: flatten the distribution, increasing randomness and creativity
+      - Use low temperature for factual, structured tasks; higher for creative, diverse outputs
+
+      **Top-p (nucleus sampling)**
+      - Instead of sampling from the entire vocabulary, restrict to the smallest set of tokens whose cumulative probability exceeds `p`
+      - `top_p=0.9`: only consider tokens that together account for 90% of the probability mass
+      - Prevents sampling from very low-probability, incoherent tokens
+
+      **Max tokens**
+      - Hard cap on the number of output tokens generated
+      - Not a suggestion — generation stops here even mid-sentence
+
+      > Practical advice: for production agents, use low temperature (0–0.3) and set explicit max tokens to control cost and predictability.
+
+  - id: quiz-temperature
+    type: challenge
+    kind: multiple-choice
+    title: 'Check Your Understanding — Temperature'
+    question: Which statement about temperature is most accurate?
+    choices:
+      - id: a
+        text: Higher temperature makes the model more deterministic and predictable
+      - id: b
+        text: Temperature controls how randomly the model samples from the next-token distribution
+        correct: true
+      - id: c
+        text: Temperature increases the size of the context window for a single call
+      - id: d
+        text: Temperature tells the model how many output tokens to generate
+    explanation: |
+      Temperature changes the sharpness of the next-token probability distribution. Lower temperature makes outputs more predictable; higher temperature increases randomness and diversity.
+
+  - id: what-is-context-window
+    type: concept
+    title: "The Context Window: Your Model's Working Memory"
+    content: |
+      The **context window** is the total number of tokens — input plus output — that a model can hold in a single call.
+
+      Everything the model "knows" during a call must fit inside it. There is no external database the model secretly queries; it can only reason about what is in the context right now.
+
+      Current context window sizes (approximate, as of 2025–2026):
+      | Model | Context window |
+      |-------|---------------|
+      | GPT-4o | 128K tokens |
+      | Claude Sonnet 4 | 200K tokens |
+      | Gemini 2.5 Pro | 1M+ tokens |
+      | Llama 3.3 70B (local) | 128K tokens |
+
+      Larger is not always better:
+      - Models degrade in quality at very long contexts ("lost in the middle" problem)
+      - Larger contexts cost more — you pay for every input token
+      - The relevant, well-organized 10K context often beats the bloated 200K context
+
+  - id: ai-model-landscape
+    type: concept
+    title: The AI Model Landscape
+    content: |
+      Large Language Models are one type of neural network — and a relatively specialized one.
+
+      The broader AI model landscape includes:
+
+      | Model type | Input | Output | Examples |
+      |------------|-------|--------|---------|
+      | LLM (text) | Text tokens | Text tokens | GPT-4o, Claude, Llama |
+      | Diffusion (image) | Text prompt + noise | Image pixels | Stable Diffusion, DALL-E, Midjourney |
+      | Video generation | Text or image | Video frames | Sora, Veo, Kling |
+      | Speech-to-text | Audio waveform | Text tokens | Whisper, Deepgram |
+      | Text-to-speech | Text tokens | Audio waveform | ElevenLabs, Kokoro |
+      | Embeddings | Text | Dense vector | text-embedding-3, BGE |
+      | Image classification | Image pixels | Class label | ResNet, ViT |
+
+      Each type has its own architecture, training paradigm, cost structure, and appropriate use cases. The fact that GPT-4o can describe an image does not mean it generates images the same way a diffusion model does.
+
+  - id: image-video-audio-models
+    type: concept
+    title: 'Image, Video, and Audio Models'
+    content: |
+      **Diffusion models** (images) work by learning to denoise random noise into a structured image, guided by a text prompt. There is no "context window" in the LLM sense; the conditioning is spatial, not sequential.
+
+      **Video generation models** extend diffusion to the temporal dimension — they must generate consistent frames that flow smoothly. This is dramatically more compute-intensive than image generation.
+
+      **Speech-to-text (Whisper)** uses an encoder-decoder transformer that converts audio spectrograms into text tokens. The "context" is the audio segment, not a text window.
+
+      **Text-to-speech** models (TTS) learn to map text tokens to acoustic features, then synthesize audio. Modern neural TTS (ElevenLabs, Kokoro) can clone voices from short samples.
+
+      **Key differences from LLMs:**
+      - Inputs and outputs are not text tokens
+      - No context window in the conversation sense
+      - Different cost structures — image/video generation is measured in images or seconds, not tokens
+      - Sampling parameters (like temperature) have different analogues (CFG scale in diffusion)
+
+  - id: multimodal-models
+    type: concept
+    title: 'Multimodal Models: When Types Converge'
+    content: |
+      **Multimodal models** accept multiple input types in the same call — most commonly text plus images, but increasingly audio and video too.
+
+      Current multimodal capabilities:
+
+      | Model | Text | Images | Audio | Video |
+      |-------|------|--------|-------|-------|
+      | GPT-4o | Yes | Yes | Yes | No |
+      | Claude Sonnet 4 | Yes | Yes | No | No |
+      | Gemini 2.5 Pro | Yes | Yes | Yes | Yes |
+      | Llama 3.2 Vision | Yes | Yes | No | No |
+
+      How it works: images are converted to "image tokens" (patch embeddings) and concatenated with the text token sequence. The transformer attends over both. The model can reason about image content in the same pass as text.
+
+      The direction the field is moving: **omni models** — single models that natively accept and produce text, audio, images, and video in a unified architecture. GPT-4o and Gemini 2.0 Flash are early examples. This matters for agentic systems because it simplifies the perception layer significantly.
+
+  - id: model-families
+    type: concept
+    title: Model Families and Naming Conventions
+    content: |
+      The major model families and what their names signal:
+
+      **OpenAI**
+      - `gpt-4o` — multimodal, fast, production workhorse
+      - `o3`, `o4-mini` — "thinking" models; spend extra tokens reasoning before answering; better at hard problems, slower and more expensive
+      - `gpt-4o-mini` — smaller, cheaper, faster; good for simple tasks
+
+      **Anthropic**
+      - `claude-opus-4` — highest capability, highest cost
+      - `claude-sonnet-4` — balanced capability and cost; current recommended default
+      - `claude-haiku-3-5` — fastest and cheapest; good for classification and simple tasks
+
+      **Google**
+      - `gemini-2.5-pro` — highest capability in the Gemini family; 1M+ token context
+      - `gemini-2.0-flash` — fast, cheap, multimodal; good for high-volume tasks
+
+      **Google / Open weights**
+      - `gemma-4-e4b` — strong open-weights model from Google; efficient enough for local use on more modest hardware
+
+      Naming patterns to learn: within a family, "Pro/Opus" = largest, "Sonnet/Flash" = balanced, "Haiku/Mini" = smallest.
+
+  - id: model-sizing
+    type: concept
+    title: 'Model Size: Parameters, Speed, and Cost'
+    content: |
+      A model's **parameter count** is the number of weights in its neural network — a rough proxy for capability and cost.
+
+      | Size | Example | Use case |
+      |------|---------|----------|
+      | Small (1B–7B) | Llama 3.2 3B, Phi-3 mini | Edge, mobile, simple classification |
+      | Medium (8B–30B) | Llama 3.1 8B, Mistral 7B | Fast local inference, moderate tasks |
+      | Large (70B–90B) | Llama 3.3 70B, Qwen 72B | Strong local inference, complex tasks |
+      | Frontier (100B+) | GPT-4o, Claude Sonnet 4, Gemini 2.5 Pro | Production agents, complex reasoning |
+
+      **Thinking / reasoning models** (o3, Claude Sonnet thinking mode) are a special category: they spend extra inference tokens reasoning internally before producing the final answer. They are slower and more expensive per query, but dramatically better at hard multi-step problems.
+
+      **The tradeoff:** bigger = smarter but slower and more expensive. The right model is the *smallest* model that reliably does the job — not the largest one available.
+
+  - id: local-models
+    type: concept
+    title: 'Local Inference: Running Models for Free'
+    content: |
+      **Local inference** means running an LLM on your own hardware — no API key, no per-token cost, just electricity.
+
+      **Tools:**
+      - **LM Studio** — GUI application; browse and run models with a chat interface
+      - **llama.cpp** — low-level C++ runtime; maximum performance on CPU and Apple Silicon
+      - **LibreChat** — self-hosted chat app that can connect to local model runtimes and local-serving backends
+
+      **Hardware requirements:**
+      - Models are loaded entirely into memory (CPU RAM or GPU VRAM)
+      - An 8B parameter model in 4-bit quantization needs ~6–8 GB RAM
+      - A 70B parameter model needs ~40 GB RAM (M3 Max / M4 Max MacBook Pro, or DGX Spark)
+      - Apple M-series chips (unified memory) are excellent for local inference
+
+      **Reading quantization labels:**
+      - `Q4` or `Q8` usually refers to the bit width used for the quantized weights
+      - `K` = modern K-quants that use super-blocks and grouped scaling, giving much better quality than older formats like `Q4_0`
+      - `M` = the medium mixed-precision variant, which keeps the most important layers at higher precision for a strong size/quality tradeoff (`S` is smaller and lossier; `L` is higher quality)
+      - Practical takeaway: `Q4_K_M` is a quantized model format label, and the part most beginners should recognize first is that `Q4` means 4-bit quantization
+
+      **When local makes sense:**
+      - High volume workloads where per-token cost is prohibitive
+      - Sensitive or private data that must not leave your network
+      - Offline / air-gapped environments
+      - Experimentation and development with no budget
+
+      **The tradeoff:** local models are smaller and less capable than frontier API models, but they are free and private. The gap narrows every year.
+
+  - id: quiz-quantization
+    type: challenge
+    kind: multiple-choice
+    title: 'Check Your Understanding — Quantization Labels'
+    question: When you see a model file labeled `Q4_K_M`, what should you infer first?
+    choices:
+      - id: a
+        text: It is a 4,000-parameter model, and `K` and `M` mean thousand and million
+      - id: b
+        text: It uses 4-bit quantization, and the rest of the label describes the quantization variant and precision mix, which can affect the size of model on disk
+        correct: true
+      - id: c
+        text: It has 4 million parameters and only runs on Mac hardware
+      - id: d
+        text: It is an uncompressed full-precision model with maximum quality
+    explanation: |
+      The key beginner takeaway is that `Q4` means 4-bit quantization. `K` refers to the newer K-quant family, and `M` means the medium mixed-precision variant chosen for a good balance of size and quality. Those suffixes can affect the quantized file's size and quality, but they do not tell you the base model's trained parameter count.
+
+  - id: model-selection
+    type: concept
+    title: Choosing the Right Model for the Job
+    content: |
+      Model selection is a **cost × quality × latency** tradeoff that should be made per task, not per project.
+
+      **Decision heuristic:**
+
+      1. **Start with the cheap/fast model** (Haiku, Flash, GPT-4o-mini)
+      2. **Evaluate on your actual task** — run 50–100 real examples
+      3. **Upgrade only if quality is insufficient** — move to Sonnet, Pro, or GPT-4o
+      4. **Reserve frontier/thinking models** for tasks where cheaper models demonstrably fail (complex reasoning, multi-step planning, edge-case judgment)
+
+      **Common routing patterns:**
+      - Classification and triage → small/fast model
+      - Structured data extraction → medium model with JSON mode
+      - Complex reasoning and planning → frontier or thinking model
+      - High-volume, low-stakes → cheapest model that passes quality bar
+
+      > The cost of over-engineering: using GPT-4o to classify email sentiment costs 20–50x more than using a small model. At scale, this is a significant budget line.
+
+  - id: quiz-model-selection
+    type: challenge
+    kind: multiple-choice
+    title: 'Check Your Understanding — Model Selection'
+    question: You are building a pipeline that classifies 10,000 customer support tickets per day into one of five categories. Which model selection strategy is most appropriate?
+    choices:
+      - id: a
+        text: Use the largest frontier model to maximize accuracy
+      - id: b
+        text: Use the cheapest model that passes a quality bar established by testing on real examples
+        correct: true
+      - id: c
+        text: Use a thinking/reasoning model because classification is inherently complex
+      - id: d
+        text: Use whichever model the provider recommends as its flagship
+    explanation: |
+      At 10,000 tickets/day, cost compounds dramatically. The right approach is to test several models on real examples and use the smallest/cheapest one that meets your quality bar. Frontier and thinking models are reserved for tasks where cheaper models demonstrably fail — simple classification rarely requires them.
+
+  - id: token-economics
+    type: concept
+    title: 'Token Economics: Pricing, Budgets, and Monitoring'
+    content: |
+      LLM APIs price per token, usually in dollars per million tokens (MTok).
+
+      **Input vs. output pricing:**
+      - Output tokens are typically **3–5x more expensive** than input tokens
+      - This is because generation requires a full model pass per token; reading input is a single forward pass
+      - Example (approximate): Claude Sonnet 4 — input $3/MTok, output $15/MTok
+
+      **Estimating workflow cost:**
+      1. Estimate tokens per call (input + expected output)
+      2. Multiply by calls per day/month
+      3. Apply the per-token price
+      4. Add a 2x safety margin for prompt iteration and retries
+
+      **Cost multipliers in agentic loops:**
+      - Each tool call result is appended to context — the context grows with each turn
+      - A 10-turn agent loop with 2K tokens per turn accumulates ~20K tokens by the end
+      - Compaction saves tokens but introduces quality risk
+
+      **Monitoring:** set spend alerts in the provider dashboard; log token counts per call; alert on anomalous usage (runaway loops, prompt injection attacks).
+
+  - id: flashcards-llm
+    type: challenge
+    kind: flashcards
+    title: LLM Concepts — Flashcard Review
+    cards:
+      - front: What is a token?
+        back: A chunk of text (roughly 4 characters in English) that LLMs use as their fundamental unit of processing and billing.
+      - front: Approximately how many tokens is 750 words?
+        back: About 1,000 tokens.
+      - front: What is inference?
+        back: Running a prompt through a trained model to get a completion; each call is stateless and independent.
+      - front: How do LLMs generate text?
+        back: Autoregressively — one token at a time, each conditioned on all previous tokens.
+      - front: What does temperature control?
+        back: The randomness of token sampling — low temperature is more deterministic, high temperature is more creative.
+      - front: What is the context window?
+        back: The total token budget (input + output) for a single model call; everything the model can reason about must fit inside it.
+      - front: What happens if the context window fills up?
+        back: Options include truncation (drop oldest tokens), refusal (API error), or compaction (lossy summarization of old turns).
+      - front: Why is output more expensive than input per token?
+        back: Each output token requires a full forward pass through the model; input is processed in a single pass.
+      - front: What is a thinking/reasoning model?
+        back: A model that spends extra inference tokens reasoning internally before producing an answer — slower and more expensive but better at hard problems.
+      - front: Name two tools for local LLM inference.
+        back: LM Studio (GUI) and llama.cpp (low-level runtime).
+
+  - id: final-quiz
+    type: challenge
+    kind: multiple-choice
+    title: Final Check — LLM Fundamentals
+    question: >
+      You are building a real-time customer chat assistant that must respond in
+      under 2 seconds, handles 50,000 queries per day, and deals with sensitive
+      customer data that cannot leave your network. Which approach is best?
+    choices:
+      - id: a
+        text: Use GPT-4o via API for maximum quality
+      - id: b
+        text: Use a thinking model (o3) because customer queries require complex reasoning
+      - id: c
+        text: Run a quantized 8B–13B local model on your own hardware
+        correct: true
+      - id: d
+        text: Use a cloud embedding model to retrieve and re-rank answers
+    explanation: |
+      Three constraints rule out API-based options: (1) sensitive data cannot leave the network, (2) 50,000 queries per day at frontier model prices is extremely expensive, and (3) sub-2-second latency is achievable with a quantized local model on reasonable hardware. A local 8B–13B model handles all three constraints. Embeddings alone cannot generate conversational responses.

@@ -1,0 +1,377 @@
+id: agentic-engineering
+title: Agentic Engineering
+description: "Learn the five pillars that separate low- and high-performing agentic engineers: harnesses, software factories, extensibility, always-on agents, and agentic access."
+icon: rocket-launch
+version: "1.0"
+tags:
+  - AI
+  - Agents
+  - Engineering
+  - Productivity
+  - Architecture
+
+steps:
+  - id: intro-video
+    type: concept
+    title: "Video: Biggest Opportunity for Sr Eng"
+    content: |
+      Watch this IndyDevDan original.
+
+      https://www.youtube.com/watch?v=2KcITKKJikA
+
+      By the end of this course, you should be able to:
+
+      - Explain what **agentic engineering** means in practice
+      - Describe the **five pillars** that create leverage
+      - Distinguish between using agents casually and building systems that compound value
+      - Apply the ideas of harness ownership, software factories, extensibility, always-on agents, and agentic access to your own work
+
+  - id: what-is-agentic-engineering
+    type: concept
+    title: What Is Agentic Engineering?
+    content: |
+      **Agentic engineering** is the practice of engineering with intelligence
+      that can operate on your behalf.
+
+      That definition is broader than "AI coding." It is not just:
+
+      - asking a chatbot for code
+      - generating one-off files in a terminal
+      - using an off-the-shelf tool exactly as provided
+
+      Instead, the focus is on building **systems of agents plus code** that
+      repeatedly create useful outcomes.
+
+      ### The key distinction
+
+      | Low leverage | High leverage |
+      |--------------|---------------|
+      | Prompting an agent back and forth | Building agentic systems that produce outcomes repeatedly |
+      | Shipping one feature yourself | Building the system that builds the feature |
+      | Consuming tool defaults | Owning the environment the agent operates in |
+
+      By the end of 2026, this style of work will be the default expectation
+      for high-performing engineers.
+
+  - id: five-pillars
+    type: concept
+    title: The Five Pillars
+    content: |
+      The gap between average and high-performing agentic engineers comes down
+      to **five pillars**:
+
+      | Pillar | Core claim |
+      |--------|------------|
+      | **Agent harnesses** | Whoever controls the harness controls the results |
+      | **Software factories** | Build factories, not features |
+      | **Extensible software** | Build systems that adapt quickly as models, tools, and workflows change |
+      | **Always-on agents** | Valuable tokens should run continuously once the arbitrage is proven |
+      | **Agentic access** | Agents can only move at agentic speed if they can programmatically reach the systems they need |
+
+      These pillars are meant to **compound together**. None of them is as
+      powerful in isolation as they are in combination.
+
+      > The theme is compounding advantage: move slow now to move fast later by
+      > investing in your agentic layer.
+
+  - id: agent-harnesses
+    type: concept
+    title: 'Pillar 1: Own the Agent Harness'
+    content: |
+      The strongest claim is this:
+
+      > **Whoever controls the agent harness controls your results.**
+
+      An **agent harness** is the environment the agent lives in: the
+      orchestration logic, customization points, communication channels, model
+      routing, safety controls, delegation rules, and domain-specific behaviors.
+
+      ### Why the default tools are only the floor
+
+      Tools like Claude Code, Codex, and OpenCode are a **great start** but a
+      **terrible place to finish**. These tools are not bad. The problem is
+      that renting a default harness limits what the agent can become for your
+      workflow.
+
+      ### What owning the harness unlocks
+
+      - multi-agent teams and orchestrators
+      - custom communication systems between agents
+      - sandbox and damage-control layers
+      - verifier harnesses where one agent checks another
+      - model fallbacks and routing rules
+      - domain-specific harnesses for DevOps, billing, testing, and other vertical work
+
+      ### The practical takeaway
+
+      One tool can generate **many specialized versions** when you own the
+      harness. If you don't own the harness, you are limited by someone else's
+      opinion about what the tool should do.
+
+  - id: software-factories
+    type: concept
+    title: 'Pillar 2: Build Factories, Not Features'
+    content: |
+      A **software factory** is a system of agents plus code that repeatedly
+      produces on-spec results.
+
+      The mindset shift is the point:
+
+      - Old mindset: *I am the engineer who builds the feature.*
+      - New mindset: *I am the engineer who builds the system that builds the feature.*
+
+      ### What belongs in a software factory
+
+      A real software factory includes a full pipeline, not just a build step:
+
+      - planning
+      - plan review
+      - scouting
+      - validation
+      - implementation
+      - testing
+      - reviewing
+
+      Each of those can be templated, delegated, and repeated.
+
+      ### Why factories matter
+
+      When you invest in the factory instead of directly in the feature, your
+      output per unit time goes **parabolic** because the result becomes
+      reproducible.
+
+      > The factory is a stamp for on-spec outcomes.
+
+      If you have tests, validation, preview environments, and agent review
+      built into the factory, they always run. That is how you go from
+      improvisation to repeatability.
+
+  - id: extensible-software
+    type: concept
+    title: 'Pillar 3: Build Extensible Software'
+    content: |
+      The third pillar is about survivability under rapid change.
+
+      Models change. Prompts change. Tools change. APIs change. The best way to
+      adapt is to build that adaptability **into the software itself**.
+
+      ### What extensible means here
+
+      - pluggable
+      - composable
+      - swappable
+      - easy to extend
+      - easy to change without rewriting everything
+
+      The governing engineering principle is familiar:
+
+      > **Open to extension, closed to modification.**
+
+      ### Why it matters in agentic systems
+
+      Brittle software slows agents down. If your system is full of hard-coded,
+      cascading rules and fragile paths, your agents inherit that complexity.
+
+      Extensible software gives agents:
+
+      - clearer seams
+      - easier model swapping
+      - simpler tool changes
+      - less tech debt to navigate
+
+      This applies both to the **engineering layer** (your harnesses and
+      workflows) and the **product layer** (the software you ship).
+
+  - id: quiz-harness-vs-factory
+    type: challenge
+    kind: multiple-choice
+    title: Check Your Understanding — Harnesses and Factories
+    question: Which statement best captures the difference between an agent harness and a software factory?
+    choices:
+      - id: a
+        text: A harness is for prompts, while a factory is for deploying models to production
+      - id: b
+        text: A harness is the environment and controls around the agent; a factory is the repeatable system that produces outcomes on spec
+        correct: true
+      - id: c
+        text: A harness is only for coding agents, while a factory is only for business workflows
+      - id: d
+        text: They are effectively the same concept with different names
+    explanation: |
+      The harness is the agent's operating environment. The factory is the
+      broader repeatable system of agents plus code that plans, builds, tests,
+      and validates outcomes.
+
+  - id: always-on-agents
+    type: concept
+    title: 'Pillar 4: Always-On Agents'
+    content: |
+      The fourth pillar is not just about automation. It is about **useful
+      token economics**.
+
+      There are three levels:
+
+      | Level | What happens |
+      |-------|--------------|
+      | 1. Use more tokens | Basic token maxing |
+      | 2. Make tokens useful | Turn model activity into real value |
+      | 3. Capture the value | Convert the value into revenue or durable business impact |
+
+      Only after levels 2 and 3 are working should you turn an agent **always
+      on**.
+
+      ### The warning
+
+      There are many cron-driven or looping agents that simply burn tokens.
+      Those are not a ceiling-level pattern. They are an expensive floor.
+
+      ### The goal
+
+      Once token spend produces reliable value and that value is captured, you
+      scale it:
+
+      - run the agent continuously
+      - let it work while you sleep
+      - treat rising API spend as a productivity KPI only when the spend maps to real value
+
+      > An always-on agent is justified by arbitrage, not by novelty.
+
+  - id: token-arbitrage
+    type: concept
+    title: Useful Tokens and Token Arbitrage
+    content: |
+      One of the strongest economic frames here is **token arbitrage**.
+
+      The idea is simple:
+
+      1. You buy tokens from a model provider
+      2. You use those tokens to create value in your workflows or products
+      3. You capture more value than you spent
+
+      If you spend `$1` on tokens and the system reliably creates more than `$1`
+      in captured value, the next step is to scale usage.
+
+      ### Why this matters
+
+      Many teams are still trapped at level one: they are spending more tokens,
+      but they are not yet turning those tokens into clear value.
+
+      ### The practical lesson
+
+      Don't celebrate token volume by itself. Celebrate:
+
+      - useful tokens
+      - captured value
+      - scalable systems that keep the margin positive
+
+      This is the difference between token maxing and a real business engine.
+
+  - id: agentic-access
+    type: concept
+    title: 'Pillar 5: Agentic Access'
+    content: |
+      The fifth pillar is straightforward but critical:
+
+      > **Agents can only command what they can programmatically reach.**
+
+      If your agents do not have access to the tools, CLIs, APIs, webhooks, and
+      systems they need, they cannot move at agentic speed.
+
+      ### What agentic access includes
+
+      - CLI tools
+      - REST APIs
+      - webhooks
+      - RPC clients
+      - internal service interfaces
+
+      ### The token tax
+
+      The useful concept here is the **token tax**.
+
+      A token tax is any unnecessary token spend caused by failing to give the
+      agent direct access to the thing it should use.
+
+      Examples:
+
+      - asking the model to reason around a manual process instead of calling an API
+      - making the agent simulate a workflow you could expose as a CLI
+      - forcing repeated instructions because the software is not instrumented for agents
+
+      ### The constraint
+
+      Access does not mean unlimited destructive power. Production access,
+      especially destructive shell access, must be constrained with safety
+      controls.
+
+  - id: flashcards-review
+    type: challenge
+    kind: flashcards
+    title: Agentic Engineering — Flashcard Review
+    cards:
+      - front: What is agentic engineering?
+        back: Engineering with intelligence that can operate on your behalf, using systems of agents plus code rather than one-off prompting.
+      - front: Why does owning the agent harness matter?
+        back: Because the harness determines the environment, routing, delegation, safety, and specialization available to the agent. Whoever controls the harness controls the results.
+      - front: What is the core mindset shift behind a software factory?
+        back: You stop thinking of yourself as the engineer who builds the feature and start thinking of yourself as the engineer who builds the system that builds the feature.
+      - front: Why is extensible software important for agentic systems?
+        back: Because models, tools, and workflows change constantly. Extensible software is pluggable, composable, and easier for agents to navigate and adapt.
+      - front: When should an agent be turned always on?
+        back: Only after token spend produces useful value and that value is captured. Otherwise it is just burning tokens.
+      - front: What is token arbitrage?
+        back: Buying tokens, using them to create value, and capturing more value than the tokens cost.
+      - front: What is the token tax?
+        back: Unnecessary token spend caused by not giving agents direct API, CLI, or system access to the tools they need.
+      - front: What does “agents can only command what they can programmatically reach” mean?
+        back: Agents need real interfaces such as APIs, CLIs, webhooks, or RPC access. Without them, they cannot operate at agentic speed.
+
+  - id: compounding-advantage
+    type: concept
+    title: Compounding the Advantage
+    content: |
+      The real edge is not any single prompt, model, or terminal workflow. It
+      is a **compounding stack of systems decisions**.
+
+      ### The full message
+
+      - Own the harness
+      - Build the factory
+      - Make the software extensible
+      - Learn the economics of useful tokens
+      - Give agents direct access to what they need
+
+      When those pieces reinforce one another, the gap between average and
+      exceptional engineers widens quickly.
+
+      ### What to avoid
+
+      Low-leverage behavior looks like this:
+
+      - staying in the terminal and vibe coding features by hand
+      - depending entirely on out-of-the-box tools
+      - burning tokens without capturing value
+      - failing to build the agent layer into the system itself
+
+      > Move slow now to move fast later.
+      > Build the system that builds the system.
+
+  - id: final-quiz
+    type: challenge
+    kind: multiple-choice
+    title: Final Check — Agentic Engineering
+    question: A senior engineer is using the same top-tier model and the same 200K-token context window as everyone else, but is still dramatically outperforming peers. What most likely explains the difference?
+    choices:
+      - id: a
+        text: They discovered a secret model checkpoint that other engineers do not have access to
+      - id: b
+        text: They write longer prompts and spend more tokens than everyone else
+      - id: c
+        text: They compound leverage through harness ownership, software factories, extensibility, useful always-on agents, and strong agentic access
+        correct: true
+      - id: d
+        text: They avoid automation and keep humans in every loop for safety
+    explanation: |
+      Model quality alone is no longer the main differentiator. The real
+      advantage comes from the systems wrapped around the agent: the harness,
+      the factory, the economics, extensibility, and access.

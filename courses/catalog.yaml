@@ -1,0 +1,15 @@
+# Master catalog — lists every course shown in the LMS.
+# GitHub Pages (and most static hosts) don't expose directory listings, so the
+# set of courses is declared here. Add a course by dropping its YAML file in
+# this directory and adding its id below.
+courses:
+  - intro-agentic-ai
+  - llm-api-anatomy
+  - llm-fundamentals
+  - prompt-engineering
+  - context-engineering
+  - harness-engineering
+  - agentic-programming
+  - mcp-protocol
+  - agentic-engineering
+  - codex-7-capabilities

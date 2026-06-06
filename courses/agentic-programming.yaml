@@ -1,0 +1,295 @@
+id: agentic-programming
+title: 'Programming Agentic AI: Frameworks & Safe Design'
+description: Build agents the right way — with safe, deterministic code harnesses instead of fragile prompt scripts. Covers Pydantic AI, structured output, and secrets safety.
+icon: code
+version: "1.0"
+tags:
+  - AI
+  - Pydantic AI
+  - Engineering
+  - Safety
+  - Frameworks
+  - Python
+
+steps:
+  - id: bash-tool-video
+    type: concept
+    title: "Watch: Why the Bash Tool Is Not Safe for Agents"
+    content: |
+      Before diving in, watch this 30min video explaining exactly why handing an
+      LLM a raw `bash` tool is a security problem — and the intuition behind why
+      constrained, schema-validated tools are the right alternative.
+
+      https://www.youtube.com/watch?v=yBcmIoA-vGs
+
+  - id: bash-tool-danger
+    type: concept
+    title: The Open Shell Anti-Pattern
+    content: |
+      The most common mistake when building an agentic system is the **open shell anti-pattern**: give the LLM a `bash` tool and let it do anything.
+
+      It feels powerful — and it is. The agent can search files, run scripts, install packages, call APIs, and manipulate data. There is no limit to what it can do.
+
+      That is precisely the problem.
+
+      When you give an LLM open shell access:
+      - Every tool call argument is a free-text string the LLM constructs
+      - There is no schema validation — the harness executes whatever the model produces
+      - **Shell injection** is trivially possible: a carefully crafted input can cause the model to construct `rm -rf /`, `curl | bash`, or mass API calls
+      - The **blast radius** is the entire operating system — files, processes, network access
+
+      > A system you must supervise every second is not autonomous. Supervision is a cost and a bottleneck. The goal is to automate supervision away — but that requires replacing the open shell with a safe harness.
+
+  - id: probabilistic-risk
+    type: concept
+    title: 'LLMs Are Probabilistic — Tail Risk is Real'
+    content: |
+      LLM output is a **probability distribution over tokens**, not a deterministic function. For any complex task, there exists some phrasing or combination of context that produces a catastrophic output.
+
+      This is called **tail risk** — the low-probability, high-damage outcome in the tail of the distribution.
+
+      | Factor | Effect on tail risk |
+      |--------|---------------------|
+      | Task complexity | More complex → more ways to go wrong |
+      | Tool power | More powerful tools → higher damage when wrong |
+      | Context length | Longer contexts → more opportunities for confusion |
+      | Model capability | More capable → can construct more sophisticated harmful actions |
+
+      You cannot enumerate all failure modes in advance. The distribution of inputs is effectively infinite.
+
+      The solution is not to make the model more careful — it is to **constrain what the model can do**, so that even a worst-case output cannot cause damage beyond an acceptable boundary.
+
+      > Tail risk is why the open shell anti-pattern is dangerous even if the model "usually" works fine. "Usually" is not a safety guarantee.
+
+  - id: quiz-safety-baseline
+    type: challenge
+    kind: multiple-choice
+    title: 'Check Your Understanding — Why Safety Matters'
+    question: Why is it insufficient to rely on the LLM being "careful" to prevent dangerous actions in an open-shell agent?
+    choices:
+      - id: a
+        text: Because LLMs are not capable of understanding shell commands
+      - id: b
+        text: Because LLM output is probabilistic — tail risk means a worst-case output is always possible, no matter how well the model usually behaves
+        correct: true
+      - id: c
+        text: Because shell commands are deprecated in modern operating systems
+      - id: d
+        text: Because the model does not have access to the shell environment
+    explanation: |
+      LLM output is a probability distribution — not a guarantee. For any complex agentic task, there is some input or context state that will produce a harmful output. The only safe approach is to constrain what the model can do, not to rely on it always making the right choice.
+
+  - id: deterministic-harness
+    type: concept
+    title: 'The 80/20 Principle: Code Wraps the LLM'
+    content: |
+      The guiding principle of safe agentic design: **approximately 80% of the system should be deterministic code; the LLM handles the remaining 20%**.
+
+      | Component | Who owns it | Examples |
+      |-----------|-------------|---------|
+      | Routing logic | Deterministic code | "If the user asks about billing, call the billing tool" |
+      | Input validation | Deterministic code | Pydantic schema enforcement |
+      | Command construction | Deterministic code | Build the shell command from validated parameters |
+      | Output formatting | Deterministic code | Convert the model's structured output to the final format |
+      | Language judgment | LLM | "Is this request about billing or support?" |
+      | Extraction | LLM | "Pull the invoice number from this email" |
+      | Planning | LLM | "What tool should I call next?" |
+
+      The LLM is invoked for decisions that require language understanding or judgment. Everything else is code.
+
+      This split makes the system:
+      - **Auditable** — code behavior is deterministic and testable
+      - **Safe** — the blast radius is bounded by what the code allows
+      - **Maintainable** — bugs in the code are reproducible; bugs in the LLM are not
+
+  - id: structured-output
+    type: concept
+    title: 'Structured Output: Schemas, Not Free Text'
+    content: |
+      Instead of parsing free-text LLM responses, require the model to return a **typed, schema-validated object**.
+
+      How it works:
+      1. Define a schema (a Pydantic model) that describes exactly what the LLM must return
+      2. Pass the schema to the API (most providers support JSON mode or function calling / tool use)
+      3. The model returns JSON conforming to the schema
+      4. The harness validates the JSON against the schema; invalid output is rejected and retried
+
+      Example schema (as prose — not Python):
+      ```
+      TicketClassification:
+        category: one of ["billing", "support", "feature-request", "other"]
+        urgency: integer 1–5
+        summary: string, max 100 characters
+        requires_human: boolean
+      ```
+
+      The LLM becomes a **structured decision function**, not an open-ended text generator. If it returns invalid JSON, or a `category` value that is not in the allowed list, the harness catches it — the garbage never reaches downstream systems.
+
+      > This is the single most impactful change you can make to an agentic system. Structured output eliminates an entire class of runtime failures.
+
+  - id: tool-allowlisting
+    type: concept
+    title: Tool Allowlisting and Input Validation
+    content: |
+      **Tool allowlisting** means the harness defines an explicit list of permitted tool calls. The LLM can only invoke tools from that list — it cannot construct arbitrary actions.
+
+      How it works:
+      1. Define each allowed tool with a name, description, and typed parameter schema
+      2. The LLM selects a tool by name and provides arguments that must match the schema
+      3. The harness validates the tool choice and parameters before execution
+      4. If validation fails, the call is rejected — the tool is never executed
+
+      Combined with structured output, allowlisting ensures:
+      - The action space is bounded and known in advance
+      - Every parameter is type-checked and range-validated before use
+      - Shell injection is impossible — commands are constructed from validated parameters, not from LLM-generated strings
+
+      **Input validation rules to enforce:**
+      - File paths must be within allowed directories (no `../` traversal)
+      - Command parameters are validated against an allowlist of safe values
+      - Numeric parameters are range-checked
+      - String parameters are length-limited and character-filtered
+
+  - id: pydantic-ai-intro
+    type: concept
+    title: What is Pydantic AI?
+    content: |
+      **Pydantic AI** is a Python framework for building production-grade LLM applications, built around the Pydantic type system.
+
+      Its core design principles:
+      - **Type safety** — all inputs and outputs are validated using Pydantic models
+      - **Model-agnostic** — swap between OpenAI, Anthropic, Gemini, and local models without changing application code
+      - **Dependency injection** — database connections, API clients, and auth tokens are injected as typed dependencies; the LLM never sees them directly
+      - **Composable** — agents can call other agents; tools can be shared across agents
+
+      Why it matters: Pydantic AI enforces the 80/20 principle at the framework level. The harness is the happy path — you cannot easily write an unsafe agent in Pydantic AI without deliberately bypassing its structure.
+
+      https://www.youtube.com/watch?v=S712jSrLWkA
+
+      Related frameworks in the same space: LangChain (broader but less opinionated), LlamaIndex (retrieval-focused), CrewAI (multi-agent), AutoGen (Microsoft, research-oriented). Pydantic AI is notable for its emphasis on type safety and production readiness.
+
+  - id: pydantic-ai-patterns
+    type: concept
+    title: 'Key Patterns: Agents, Tools, and Result Types'
+    content: |
+      Three core abstractions in Pydantic AI:
+
+      **Agent**
+      The main entry point. Configured with a model, system prompt, and set of tools. Runs the perceive-reason-act loop. Returns a typed result.
+
+      **Tool**
+      A decorated function the LLM can call. The function signature defines the schema — parameter names and types are automatically extracted. The harness validates all arguments before calling the function. Tools can access injected dependencies (database sessions, API clients) through the dependency context — the LLM never sees these values directly.
+
+      **Result Type**
+      A Pydantic model that defines the shape of the final output. The agent loop continues until the LLM produces a valid result conforming to this model. If the model produces invalid output, the agent retries automatically (up to a configured limit).
+
+      Together these three abstractions make the full call chain type-safe:
+      - Inputs to the agent are validated
+      - Tool arguments are validated
+      - Tool outputs are typed
+      - The final result is validated
+
+      Every invalid output is caught at the harness level, never propagated to downstream systems.
+
+  - id: read-only-safety
+    type: concept
+    title: Read-Only Constraints and Shell Safety
+    content: |
+      Even with allowlisting and validation, shell access remains the highest-risk action category. The safest harness pattern treats the shell as **read-only by default**.
+
+      **Read-only shell principles:**
+      - Only `read` and `inspect` operations are available (no `rm`, `mv`, `cp`, `curl -X DELETE`)
+      - File writes go through a dedicated, validated write tool — not a shell passthrough
+      - All shell commands are constructed by the harness from validated parameters — the LLM provides structured input, the code builds the command string
+      - Shell metacharacters (`|`, `&`, `;`, `$()`, backticks) are stripped or escaped from all LLM-provided parameters — the LLM cannot inject metacharacters that execute additional commands
+
+      **Why read-only is the safe default:**
+      - Reads can be audited and are reversible (no state change)
+      - Writes and deletes are irreversible; they require explicit, justified escalation in the tool allowlist
+      - Starting read-only and adding write capabilities as needed forces explicit risk assessment for each new capability
+
+  - id: quiz-pydantic
+    type: challenge
+    kind: multiple-choice
+    title: 'Check Your Understanding — Safe Harnesses'
+    question: In a Pydantic AI harness, what happens if the LLM returns output that does not conform to the defined Result Type schema?
+    choices:
+      - id: a
+        text: The harness passes the invalid output downstream and logs a warning
+      - id: b
+        text: The call fails permanently and raises an unhandled exception
+      - id: c
+        text: The harness rejects the output and retries the LLM call automatically, up to a configured limit
+        correct: true
+      - id: d
+        text: The harness attempts to parse the output as plain text instead
+    explanation: |
+      Pydantic AI validates all LLM outputs against the defined Result Type. Invalid output triggers an automatic retry. This means invalid structured output never propagates to downstream systems — the harness absorbs the failure and attempts to recover. If retries are exhausted, the call fails cleanly with a typed error.
+
+  - id: secrets-in-code
+    type: concept
+    title: 'Secrets in Agentic Code: What Not to Do'
+    content: |
+      **Secrets — API keys, passwords, OAuth tokens, database credentials — must never appear in LLM context.**
+
+      Why this is non-negotiable:
+      - Secrets in the prompt can appear in completions (the model may echo them back)
+      - They appear in logs if you log tool call arguments (which you should)
+      - They can be exposed in fine-tuning datasets if you use production logs for training
+      - They can be extracted by prompt injection attacks that cause the model to repeat context
+
+      **The right pattern:**
+      1. Secrets live in environment variables or a secrets manager (1Password, or Vault)
+      2. The harness reads the secret at startup and injects it into tool implementations as a typed dependency
+      3. The LLM calls a tool by name (e.g. `send_email`) — it never sees the OAuth token
+      4. The harness uses the token to make the actual API call
+
+      In Pydantic AI, this is enforced by the **dependency injection model**: database sessions, API clients, and auth tokens are injected as typed dependencies into tool functions. They are never passed through the LLM turn.
+
+      **Additional defenses:**
+      - Add `.env` and `secrets/` to `.copilotignore` so the agent cannot read them
+      - Add them to `.gitignore` so they are never committed
+      - Rotate secrets regularly; alert on unexpected usage patterns
+
+  - id: flashcards-frameworks
+    type: challenge
+    kind: flashcards
+    title: Framework Concepts — Flashcard Review
+    cards:
+      - front: What is the 80/20 principle in agentic design?
+        back: ~80% of the system is deterministic code; the LLM handles ~20% — only the parts that require language understanding or judgment.
+      - front: What is structured output?
+        back: Requiring the LLM to return a schema-validated typed object instead of free text, so invalid output is caught at the harness level.
+      - front: What is tool allowlisting?
+        back: Defining an explicit list of permitted tool calls; the LLM selects from this list, and the harness validates parameters before execution.
+      - front: What is a Pydantic AI Result Type?
+        back: A Pydantic model defining the shape of the agent's final output; the loop continues until the LLM produces a valid result conforming to this model.
+      - front: Why is compaction dangerous in agentic loops?
+        back: Compaction is lossy — the summary may drop critical constraints, specific facts, or nuance that the agent was relying on.
+      - front: What is the read-only shell principle?
+        back: Restrict the agent to read/inspect operations by default; require explicit justification and validation to add any write or delete capability.
+      - front: Why must secrets never appear in LLM context?
+        back: They can appear in completions, logs, fine-tuning datasets, or be extracted by prompt injection attacks.
+      - front: How does Pydantic AI enforce secrets safety?
+        back: Through dependency injection — database sessions, API clients, and auth tokens are injected as typed dependencies into tool functions; the LLM never sees them.
+
+  - id: final-quiz
+    type: challenge
+    kind: multiple-choice
+    title: Final Check — Safe Agent Design
+    question: >
+      An agent receives a user message, extracts a file path from it, and passes
+      that path directly to a shell `cat` command constructed as a string. What
+      is the primary security vulnerability in this design?
+    choices:
+      - id: a
+        text: The agent should use Python's open() instead of cat
+      - id: b
+        text: The LLM-extracted path is unvalidated — it could contain path traversal sequences or shell metacharacters, enabling shell injection or unauthorized file access
+        correct: true
+      - id: c
+        text: The agent should ask the user to confirm the path before proceeding
+      - id: d
+        text: This design is safe as long as the model is instructed to only extract valid paths
+    explanation: |
+      Passing unvalidated LLM output directly into a shell command is a classic shell injection vulnerability. The LLM may extract a path containing "../../../etc/passwd" or "foo; rm -rf /". The fix: validate the extracted path against an allowlist of permitted directories, strip metacharacters, and construct the command from validated parameters — never from a raw LLM string.

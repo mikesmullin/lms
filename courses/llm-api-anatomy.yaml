@@ -1,0 +1,639 @@
+id: llm-api-anatomy
+title: "Anatomy of an LLM API Request"
+description: Learn to construct, send, and interpret HTTP requests to LLM inference APIs — from auth headers to streaming responses and error handling.
+icon: plugs-connected
+version: "1.0"
+tags:
+  - AI
+  - APIs
+  - HTTP
+  - LLMs
+  - Engineering
+
+steps:
+
+  # ─── Part 1: HTTP Foundations ───────────────────────────────────────────────
+
+  - id: http-primer
+    type: concept
+    title: What is an HTTP Request?
+    content: |
+      Every time your code calls an LLM, it sends an **HTTP request** over the
+      network to a server run by the provider. Understanding the anatomy of that
+      request gives you full control over what the model receives.
+
+      ### The four parts of an HTTP request
+
+      | Part | Purpose | Example |
+      |------|---------|---------|
+      | **Method** | What action to take | `POST` |
+      | **URL** | Which endpoint to call | `https://api.openai.com/v1/chat/completions` |
+      | **Headers** | Metadata and auth | `Content-Type: application/json` |
+      | **Body** | The payload (JSON) | `{"model": "gpt-4o", "messages": [...]}` |
+
+      LLM completions always use **`POST`** — you are submitting data (your
+      prompt) and getting a new resource back (the completion).
+
+      ### A minimal example
+
+      ```
+      POST https://api.openai.com/v1/chat/completions
+      Content-Type: application/json
+      Authorization: Bearer sk-...
+
+      {
+        "model": "gpt-4o",
+        "messages": [
+          { "role": "user", "content": "Hello!" }
+        ]
+      }
+      ```
+
+      The **headers** travel above the blank line; the **body** travels below it.
+      You never need to construct the raw HTTP text yourself — libraries like
+      `fetch`, `axios`, or the official SDKs do it for you — but knowing what
+      is inside removes all the mystery.
+
+  - id: auth-headers
+    type: concept
+    title: "Authentication: API Keys & Bearer Tokens"
+    content: |
+      Providers need to know *who* is making the request so they can bill the
+      right account and enforce rate limits. The standard mechanism is an
+      **API key** passed in the `Authorization` header.
+
+      ### The Bearer pattern
+
+      ```
+      Authorization: Bearer YOUR_API_KEY_HERE
+      ```
+
+      The word `Bearer` is a token type defined in
+      [RFC 6750](https://www.rfc-editor.org/rfc/rfc6750). You prepend it to
+      your key, separated by a single space.
+
+      ### Provider variations
+
+      | Provider | Header name | Format |
+      |----------|------------|--------|
+      | OpenAI | `Authorization` | `Bearer sk-...` |
+      | Anthropic | `x-api-key` | Just the raw key (no `Bearer`) |
+      | Google Gemini | URL query param or `Authorization` | `Bearer ya29...` |
+
+      ### Key hygiene rules
+
+      - **Never** commit an API key to source control
+      - Store keys in environment variables (`process.env.OPENAI_API_KEY`)
+      - Rotate keys immediately if they are ever exposed
+      - Use provider dashboards to scope keys to minimum required permissions
+
+      > An exposed API key is a billing liability and a security incident.
+      > Treat it like a password.
+
+  # ─── Part 2: The Request Body ───────────────────────────────────────────────
+
+  - id: request-shape-overview
+    type: concept
+    title: "The Request Shape at a Glance"
+    content: |
+      Before we dissect each field, here is the whole picture. This is the
+      anatomy of a typical request to an OpenAI-compatible chat API — headers
+      on top, JSON body below.
+
+      ![Infographic: the anatomy of an OpenAI-compatible LLM API request](courses/images/http-api-req.png)
+
+      Keep this mental model handy — the next few slides zoom into each part:
+      the **model**, the **messages** array, and the **sampling parameters**.
+
+  - id: request-model
+    type: concept
+    title: "Choosing a Model"
+    content: |
+      The `model` field tells the provider which model to run your request
+      against. It is a string whose exact value is defined by each provider.
+
+      ### Common model identifiers
+
+      | Provider | Example values |
+      |----------|---------------|
+      | OpenAI | `gpt-4o`, `gpt-4o-mini`, `o3`, `o4-mini` |
+      | Anthropic | `claude-opus-4-5`, `claude-sonnet-4-5`, `claude-haiku-4-5` |
+      | Google | `gemini-2.5-pro`, `gemini-2.5-flash` |
+      | Mistral | `mistral-large-latest`, `mistral-small-latest` |
+
+      ### Naming patterns to know
+
+      - **Versioning:** Providers often append dates or version numbers
+        (`gpt-4o-2024-11-20`). The un-versioned alias (e.g. `gpt-4o`) typically
+        resolves to the latest stable version.
+      - **Size tiers:** Most providers offer a spectrum from small/fast/cheap
+        to large/slow/capable. Common naming: `mini`, `haiku`, `flash` = small;
+        `pro`, `opus`, `large` = capable.
+      - **Snapshots vs aliases:** For production workloads, pin to a dated
+        snapshot so your behaviour doesn't change when the provider updates the alias.
+
+      ```json
+      {
+        "model": "gpt-4o-mini",
+        ...
+      }
+      ```
+
+  - id: request-messages
+    type: concept
+    title: "The `messages` Array"
+    content: |
+      The `messages` array is the heart of every chat completions request. It
+      represents the full conversation history the model sees.
+
+      ### Message roles
+
+      | Role | Who sends it | Purpose |
+      |------|-------------|---------|
+      | `system` | You (developer) | Set the model's persona, rules, context |
+      | `user` | The end user | The human turn of the conversation |
+      | `assistant` | The model | Previous model responses (for multi-turn) |
+
+      ### A single-turn request
+
+      ```json
+      {
+        "model": "gpt-4o",
+        "messages": [
+          { "role": "system",  "content": "You are a helpful assistant." },
+          { "role": "user",    "content": "What is 2 + 2?" }
+        ]
+      }
+      ```
+
+      ### A multi-turn request
+
+      To continue a conversation, append each previous exchange to the array:
+
+      ```json
+      {
+        "model": "gpt-4o",
+        "messages": [
+          { "role": "system",    "content": "You are a helpful assistant." },
+          { "role": "user",      "content": "What is 2 + 2?" },
+          { "role": "assistant", "content": "2 + 2 equals 4." },
+          { "role": "user",      "content": "And 4 + 4?" }
+        ]
+      }
+      ```
+
+      The model has no memory between API calls — **you** are responsible for
+      maintaining and appending the conversation history each time.
+
+      ### Image inputs (multimodal)
+
+      For vision-capable models, a message's `content` can be an array of
+      content parts instead of a plain string:
+
+      ```json
+      { "role": "user", "content": [
+          { "type": "text",      "text": "What is in this image?" },
+          { "type": "image_url", "image_url": { "url": "https://..." } }
+      ]}
+      ```
+
+  - id: request-sampling
+    type: concept
+    title: "Sampling Parameters: temperature, max_tokens, top_p"
+    content: |
+      These parameters control **how** the model generates text — the randomness
+      and length of its output.
+
+      ### `temperature`
+
+      Controls randomness. Range: `0.0` – `2.0` (OpenAI); `0.0` – `1.0`
+      (Anthropic).
+
+      | Value | Effect | Use case |
+      |-------|--------|---------|
+      | `0.0` | Deterministic / greedy | Code generation, data extraction |
+      | `0.7` | Balanced (default) | General chat |
+      | `1.0`+ | Creative / varied | Brainstorming, creative writing |
+
+      > **Rule of thumb:** use low temperature when you want reliable,
+      > consistent answers; high temperature when you want variety and creativity.
+
+      ### `max_tokens`
+
+      The maximum number of tokens the model may generate in its response.
+      Setting this prevents runaway long completions and controls cost.
+
+      ```json
+      { "max_tokens": 512 }
+      ```
+
+      One token ≈ 4 characters of English text. A 512-token response is roughly
+      350–400 words.
+
+      ### `top_p` (nucleus sampling)
+
+      An alternative to temperature. Restricts the model to sampling only from
+      the top tokens that together account for probability mass `p`.
+
+      ```json
+      { "top_p": 0.95 }
+      ```
+
+      **Do not change both `temperature` and `top_p` at the same time** — pick
+      one strategy. Most use cases only need `temperature`.
+
+  - id: request-extras
+    type: concept
+    title: "Optional Fields: stop, stream, and tools"
+    content: |
+      Beyond the core fields, several optional parameters give you fine-grained
+      control over the model's output.
+
+      ### `stop`
+
+      A string or array of strings where the model will stop generating:
+
+      ```json
+      { "stop": ["###", "END"] }
+      ```
+
+      Useful when you want structured output with a clear terminator — the stop
+      sequence itself is *not* included in the response.
+
+      ### `stream`
+
+      When `true`, the response is sent as a stream of Server-Sent Events
+      instead of one big JSON blob. This lets your UI show tokens as they arrive.
+
+      ```json
+      { "stream": true }
+      ```
+
+      See the *Streaming Responses* slide for the full SSE format.
+
+      ### `tools` (function calling)
+
+      Allows the model to request that your code call a function on its behalf.
+      You declare a list of available tools with JSON Schema descriptions:
+
+      ```json
+      {
+        "tools": [{
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "description": "Get current weather for a location",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "location": { "type": "string" }
+              },
+              "required": ["location"]
+            }
+          }
+        }]
+      }
+      ```
+
+      If the model decides to call a tool, the response contains a
+      `tool_calls` array instead of plain text content — your code executes
+      the function and sends the result back as a new `tool` role message.
+
+  - id: quiz-request-body
+    type: challenge
+    kind: multiple-choice
+    title: "Check Your Understanding — Request Body"
+    question: "You want to build a multi-turn chatbot. After the user sends a second message, what must your request's `messages` array contain?"
+    choices:
+      - id: a
+        text: Only the latest user message — the provider remembers the conversation
+      - id: b
+        text: The system message and the latest user message only
+      - id: c
+        text: Every message in the conversation so far — system, all user turns, and all assistant turns
+        correct: true
+      - id: d
+        text: The latest user message and the latest assistant message only
+    explanation: |
+      LLM APIs are stateless — the provider has no memory of previous calls.
+      You must include the full conversation history (system + every alternating
+      user/assistant pair) in every request so the model has context.
+
+  # ─── Part 3: The Response ───────────────────────────────────────────────────
+
+  - id: response-shape
+    type: concept
+    title: Reading the Response Object
+    content: |
+      A successful non-streaming response is a JSON object. Here is the full
+      shape for an OpenAI-style response:
+
+      ```json
+      {
+        "id": "chatcmpl-abc123",
+        "object": "chat.completion",
+        "created": 1714000000,
+        "model": "gpt-4o-2024-11-20",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "2 + 2 equals 4."
+            },
+            "finish_reason": "stop"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 27,
+          "completion_tokens": 9,
+          "total_tokens": 36
+        }
+      }
+      ```
+
+      ### Key fields
+
+      | Field | Meaning |
+      |-------|---------|
+      | `choices[0].message.content` | The model's text reply — this is what you display |
+      | `choices[0].finish_reason` | Why generation stopped |
+      | `usage.prompt_tokens` | Tokens consumed by your input |
+      | `usage.completion_tokens` | Tokens consumed by the output |
+      | `usage.total_tokens` | Sum — what you are billed for |
+
+      ### `finish_reason` values
+
+      | Value | Meaning |
+      |-------|---------|
+      | `stop` | Model reached a natural end or a `stop` sequence |
+      | `length` | Hit `max_tokens` limit — response may be truncated |
+      | `tool_calls` | Model wants to call a tool |
+      | `content_filter` | Output was blocked by safety filters |
+
+      > If you see `finish_reason: "length"`, increase `max_tokens` or
+      > summarise your prompt — the answer is incomplete.
+
+  - id: response-streaming
+    type: concept
+    title: "Streaming Responses (SSE)"
+    content: |
+      With `"stream": true`, the provider sends the response as a stream of
+      **Server-Sent Events** (SSE) rather than waiting for the full completion.
+
+      ### What the wire looks like
+
+      Each line starting with `data:` is one chunk:
+
+      ```
+      data: {"id":"chatcmpl-abc","choices":[{"delta":{"role":"assistant"},"index":0}]}
+
+      data: {"id":"chatcmpl-abc","choices":[{"delta":{"content":"2"},"index":0}]}
+
+      data: {"id":"chatcmpl-abc","choices":[{"delta":{"content":" +"},"index":0}]}
+
+      data: {"id":"chatcmpl-abc","choices":[{"delta":{"content":" 2"},"index":0}]}
+
+      data: {"id":"chatcmpl-abc","choices":[{"delta":{"content":" equals 4."},"index":0,"finish_reason":"stop"}]}
+
+      data: [DONE]
+      ```
+
+      ### Key things to know
+
+      - Each chunk has a `delta` object instead of `message` — it contains only
+        **the new text** since the last chunk
+      - Concatenate all `delta.content` values to reconstruct the full response
+      - The stream ends with the literal line `data: [DONE]` — stop reading here
+      - The `usage` object is only present in the **final** chunk (and only if
+        you pass `"stream_options": {"include_usage": true}` in OpenAI's API)
+
+      ### Consuming a stream in JavaScript
+
+      ```js
+      const res = await fetch(url, { method: 'POST', body: JSON.stringify({...}), headers });
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+
+      for await (const chunk of streamLines(reader, decoder)) {
+        if (chunk === '[DONE]') break;
+        const json = JSON.parse(chunk);
+        const token = json.choices[0]?.delta?.content ?? '';
+        process.stdout.write(token); // print as it arrives
+      }
+      ```
+
+  # ─── Part 4: Provider Differences ──────────────────────────────────────────
+
+  - id: provider-openai
+    type: concept
+    title: OpenAI Chat Completions API
+    content: |
+      OpenAI's Chat Completions API is the de facto standard that most other
+      providers have converged on.
+
+      ### Endpoint
+
+      ```
+      POST https://api.openai.com/v1/chat/completions
+      ```
+
+      ### Required headers
+
+      ```
+      Content-Type: application/json
+      Authorization: Bearer sk-...
+      ```
+
+      ### Minimal request
+
+      ```json
+      {
+        "model": "gpt-4o",
+        "messages": [
+          { "role": "system",  "content": "You are a helpful assistant." },
+          { "role": "user",    "content": "Explain async/await in one sentence." }
+        ]
+      }
+      ```
+
+      ### Things unique to OpenAI
+
+      - **`system` role is inside the `messages` array** (not a top-level field)
+      - Model names follow `gpt-4o`, `o3`, `o4-mini` patterns
+      - Responses API (`/v1/responses`) is a newer stateful alternative for
+        agentic workloads — not yet widely adopted
+      - `organization` and `project` headers can scope billing to sub-teams
+
+      ### OpenAI-compatible APIs
+
+      Many providers (Groq, Together AI, OpenRouter, local models via Ollama)
+      implement the same request/response shape — you only change the base URL
+      and key. This makes OpenAI's format worth knowing first.
+
+  - id: provider-anthropic
+    type: concept
+    title: "Anthropic Messages API — Key Differences"
+    content: |
+      Anthropic's Messages API has meaningful differences from the OpenAI shape.
+      Knowing them prevents confusing errors when switching providers.
+
+      ### Endpoint
+
+      ```
+      POST https://api.anthropic.com/v1/messages
+      ```
+
+      ### Required headers
+
+      ```
+      Content-Type: application/json
+      x-api-key: sk-ant-...
+      anthropic-version: 2023-06-01
+      ```
+
+      > Note: **`x-api-key`** (not `Authorization: Bearer`), and a required
+      > **`anthropic-version`** header specifying the API version to use.
+
+      ### Key structural differences vs OpenAI
+
+      | Feature | OpenAI | Anthropic |
+      |---------|--------|-----------|
+      | Auth header | `Authorization: Bearer` | `x-api-key` (raw key) |
+      | Version header | Not required | `anthropic-version` required |
+      | System prompt | Inside `messages` as `role: system` | **Top-level `system` field** |
+      | Max tokens field | `max_tokens` | `max_tokens` (same) |
+      | Response text path | `choices[0].message.content` | `content[0].text` |
+
+      ### Minimal Anthropic request
+
+      ```json
+      {
+        "model": "claude-sonnet-4-5",
+        "max_tokens": 1024,
+        "system": "You are a helpful assistant.",
+        "messages": [
+          { "role": "user", "content": "Explain async/await in one sentence." }
+        ]
+      }
+      ```
+
+      ### Google Gemini (brief)
+
+      Gemini uses `POST .../generateContent` with a `contents` array (instead
+      of `messages`), and roles are `user` / `model` (not `assistant`). The
+      Gemini API also has an OpenAI-compatible mode at
+      `https://generativelanguage.googleapis.com/v1beta/openai/`.
+
+  - id: flashcards-providers
+    type: challenge
+    kind: flashcards
+    title: Provider Comparison — Flashcard Review
+    cards:
+      - front: What HTTP method do all LLM completions endpoints use?
+        back: POST — you are submitting a prompt and receiving a new completion resource.
+      - front: How does OpenAI expect the API key in the request?
+        back: In the `Authorization` header as `Bearer sk-...`
+      - front: How does Anthropic expect the API key?
+        back: 'In the `x-api-key` header as a raw key (no "Bearer" prefix). Also requires an `anthropic-version` header.'
+      - front: Where does the system prompt live in an OpenAI request?
+        back: 'Inside the `messages` array as an object with "role": "system"'
+      - front: Where does the system prompt live in an Anthropic request?
+        back: 'As a top-level "system" field — outside the `messages` array.'
+      - front: In an OpenAI response, where is the model's text reply?
+        back: 'choices[0].message.content'
+      - front: In an Anthropic response, where is the model's text reply?
+        back: 'content[0].text'
+      - front: 'What does finish_reason: "length" mean?'
+        back: 'The model hit the `max_tokens` limit before finishing. The response is likely truncated — increase `max_tokens`.'
+      - front: What sentinel value signals the end of a streaming response?
+        back: 'The line data: [DONE]'
+      - front: What is the main advantage of OpenAI-compatible APIs?
+        back: You can switch providers (Groq, Together, Ollama, OpenRouter) by only changing the base URL and API key — the request/response shape stays the same.
+
+  # ─── Part 5: Error Handling & Limits ────────────────────────────────────────
+
+  - id: errors-and-limits
+    type: concept
+    title: "HTTP Errors, Rate Limits & Retries"
+    content: |
+      When something goes wrong, the provider returns an HTTP error status and a
+      JSON body describing the problem. Learning to read these quickly saves a
+      lot of debugging time.
+
+      ### Common error codes
+
+      | Status | Meaning | Likely cause |
+      |--------|---------|-------------|
+      | `400` | Bad Request | Malformed JSON, invalid field, unknown model name |
+      | `401` | Unauthorized | Missing, wrong, or expired API key |
+      | `403` | Forbidden | Key valid but lacks permission (wrong org, no access to model) |
+      | `404` | Not Found | Wrong endpoint URL |
+      | `422` | Unprocessable | Valid JSON but field values fail validation |
+      | `429` | Too Many Requests | Rate limit hit |
+      | `500` | Internal Server Error | Provider-side error — retry |
+      | `529` | Overloaded (Anthropic) | Provider is busy — retry with backoff |
+
+      ### Reading the error body
+
+      Both OpenAI and Anthropic return a JSON error body:
+
+      ```json
+      {
+        "error": {
+          "message": "Invalid API key provided.",
+          "type": "invalid_request_error",
+          "code": "invalid_api_key"
+        }
+      }
+      ```
+
+      Always log `error.message` — it tells you exactly what went wrong.
+
+      ### Rate limits and the `Retry-After` header
+
+      On a `429`, providers often include a `Retry-After` header telling you
+      how many seconds to wait:
+
+      ```
+      HTTP/1.1 429 Too Many Requests
+      Retry-After: 12
+      ```
+
+      ### Exponential backoff
+
+      For `429` and `5xx` errors, retry with increasing delays:
+
+      ```
+      attempt 1: wait 1s
+      attempt 2: wait 2s
+      attempt 3: wait 4s
+      attempt 4: wait 8s
+      ...up to a max (e.g. 60s)
+      ```
+
+      Add a small random jitter (±10%) to avoid all clients retrying in sync.
+      Most official SDKs implement backoff automatically.
+
+  - id: final-quiz
+    type: challenge
+    kind: multiple-choice
+    title: "Final Check — Putting It All Together"
+    question: |
+      You call an Anthropic endpoint and receive a `429` response with a
+      `Retry-After: 5` header. Your code should:
+    choices:
+      - id: a
+        text: Immediately retry — 429s are transient and resolve on their own
+      - id: b
+        text: Log the error, wait 5 seconds, then retry — and use exponential backoff if it keeps failing
+        correct: true
+      - id: c
+        text: Switch to a different provider — Anthropic is down
+      - id: d
+        text: Check your API key — 429 means authentication failed
+    explanation: |
+      A `429` means you hit a rate limit — not an auth failure (that's `401`).
+      The `Retry-After: 5` header tells you exactly how long to wait before
+      your next attempt. From there, use exponential backoff so that repeated
+      failures don't hammer the provider.

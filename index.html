@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lumen LMS</title>
+
+  <!-- Tailwind CSS (CDN play build) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            // Deep forest / emerald dark theme (intentionally NOT slate-blue)
+            night:    '#0a1512',
+            surface:  '#0f211b',
+            surface2: '#143028',
+            surface3: '#1b3d33',
+            edge:     '#244d40',
+            ink:      '#e7f4ee',
+            inkdim:   '#9fc3b4',
+            inkfaint: '#6f9486',
+            accent:   '#34d399', // emerald
+            accent2:  '#f59e0b', // amber
+            danger:   '#f87171',
+          },
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          },
+          keyframes: {
+            slidein: {
+              '0%':   { opacity: '0', transform: 'translateY(14px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            popin: {
+              '0%':   { opacity: '0', transform: 'scale(.92)' },
+              '100%': { opacity: '1', transform: 'scale(1)' },
+            },
+            flip: {
+              '0%':   { transform: 'rotateY(0deg)' },
+              '100%': { transform: 'rotateY(180deg)' },
+            },
+          },
+          animation: {
+            slidein: 'slidein .45s cubic-bezier(.2,.7,.2,1) both',
+            popin: 'popin .3s ease-out both',
+          },
+        },
+      },
+    }
+  </script>
+
+  <!-- Phosphor Icons -->
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" />
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+
+  <!-- YAML + Markdown parsers -->
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+
+  <!-- Twitter/X widget (lazy — only loads when a tweet embed is present) -->
+  <script>window._twitterWidgetLoaded=false;function _loadTwitterWidget(){if(!window._twitterWidgetLoaded){window._twitterWidgetLoaded=true;var s=document.createElement('script');s.src='https://platform.twitter.com/widgets.js';s.async=true;s.charset='utf-8';document.head.appendChild(s);}}</script>
+
+  <style>
+    [x-cloak] { display: none !important; }
+
+    html, body { height: 100%; }
+    body {
+      background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(52,211,153,.10), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,.08), transparent 55%),
+        #0a1512;
+      background-attachment: fixed;
+      color: #e7f4ee;
+    }
+
+    /* Custom slim scrollbars */
+    *::-webkit-scrollbar { width: 10px; height: 10px; }
+    *::-webkit-scrollbar-track { background: transparent; }
+    *::-webkit-scrollbar-thumb { background: #244d40; border-radius: 99px; border: 2px solid transparent; background-clip: padding-box; }
+    *::-webkit-scrollbar-thumb:hover { background: #2f6451; background-clip: padding-box; }
+
+    /* Rendered markdown ("prose") styling */
+    .prose-lms { line-height: 1.75; font-size: 1.05rem; color: #d7ece3; }
+    .prose-lms h1, .prose-lms h2, .prose-lms h3 { color: #ffffff; font-weight: 700; line-height: 1.25; margin: 1.4em 0 .55em; }
+    .prose-lms h1 { font-size: 1.6rem; }
+    .prose-lms h2 { font-size: 1.3rem; }
+    .prose-lms h3 { font-size: 1.12rem; color: #aef3da; }
+    .prose-lms p { margin: .85em 0; }
+    .prose-lms strong { color: #ffffff; font-weight: 700; }
+    .prose-lms em { color: #fcd9a0; }
+    .prose-lms ul, .prose-lms ol { margin: .85em 0; padding-left: 1.4em; }
+    .prose-lms ul { list-style: disc; }
+    .prose-lms ol { list-style: decimal; }
+    .prose-lms li { margin: .35em 0; }
+    .prose-lms li::marker { color: #34d399; }
+    .prose-lms a { color: #34d399; text-decoration: underline; text-underline-offset: 2px; }
+    .prose-lms code { background: #102b22; color: #aef3da; padding: .12em .4em; border-radius: 6px; font-size: .9em; border: 1px solid #244d40; }
+    .prose-lms pre { background: #08120e; border: 1px solid #244d40; padding: 1em; border-radius: 12px; overflow-x: auto; margin: 1em 0; }
+    .prose-lms pre code { background: transparent; border: none; padding: 0; }
+    .prose-lms blockquote { border-left: 3px solid #34d399; padding: .2em 0 .2em 1.1em; margin: 1em 0; color: #aef3da; font-style: italic; background: rgba(52,211,153,.05); border-radius: 0 8px 8px 0; }
+
+    /* Markdown tables */
+    .prose-lms table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: .97rem; }
+    .prose-lms th { background: rgba(52,211,153,.12); color: #aef3da; font-weight: 600; text-align: left; padding: .55em .9em; border-bottom: 2px solid #244d40; }
+    .prose-lms td { padding: .5em .9em; border-bottom: 1px solid #1a3d30; color: #d7ece3; vertical-align: top; }
+    .prose-lms tr:last-child td { border-bottom: none; }
+    .prose-lms tbody tr:nth-child(even) td { background: rgba(52,211,153,.05); }
+    .prose-lms tbody tr:hover td { background: rgba(52,211,153,.12); }
+
+    /* Centered, framed images on their own line */
+    .prose-lms img { display: block; margin: 1.6em auto; max-width: 100%; height: auto; border-radius: 14px; border: 1px solid #244d40; box-shadow: 0 10px 30px rgba(0,0,0,.35); cursor: zoom-in; transition: filter .2s ease, transform .2s ease; }
+    .prose-lms img:hover { filter: brightness(1.06); }
+
+    /* Responsive 16:9 video embeds (YouTube) */
+    .prose-lms .video-embed, .video-embed { position: relative; width: 100%; margin: 1.6em auto; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; border: 1px solid #244d40; box-shadow: 0 10px 30px rgba(0,0,0,.35); background: #000; }
+    .video-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+    /* Twitter/X tweet embeds */
+    .prose-lms .tweet-embed, .tweet-embed { display: flex; justify-content: center; margin: 1.6em auto; max-width: 550px; }
+    .tweet-embed .twitter-tweet { margin: 0 auto !important; }
+
+    /* Flashcard 3D flip */
+    .flip-scene { perspective: 1400px; }
+    .flip-card { transform-style: preserve-3d; transition: transform .55s cubic-bezier(.2,.7,.2,1); }
+    .flip-card.is-flipped { transform: rotateY(180deg); }
+    .flip-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .flip-face.back { transform: rotateY(180deg); }
+
+    /* Smooth global transitions */
+    .tx { transition: all .2s ease; }
+
+    #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 60; }
+  </style>
+</head>
+
+<body class="font-sans antialiased">
+<div x-data="lmsApp()" x-init="init()" x-cloak class="min-h-screen flex flex-col">
+
+  <!-- ===================== LOADING ===================== -->
+  <template x-if="loading">
+    <div class="fixed inset-0 grid place-items-center bg-night/90 z-50">
+      <div class="flex flex-col items-center gap-4">
+        <i class="ph ph-circle-notch text-5xl text-accent animate-spin"></i>
+        <p class="text-inkdim text-sm tracking-wide">Loading your courses…</p>
+      </div>
+    </div>
+  </template>
+
+  <!-- ===================== TOP BAR ===================== -->
+  <header class="sticky top-0 z-40 backdrop-blur-xl bg-night/70 border-b border-edge/60">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-3">
+      <button @click="goCatalog()" class="flex items-center gap-2.5 group">
+        <span class="grid place-items-center w-9 h-9 rounded-xl bg-gradient-to-br from-accent to-emerald-600 text-night shadow-lg shadow-accent/20 group-hover:scale-105 tx">
+          <i class="ph-fill ph-graduation-cap text-xl"></i>
+        </span>
+        <span class="text-lg font-extrabold tracking-tight text-ink">Lumen<span class="text-accent">LMS</span></span>
+      </button>
+
+      <div class="flex-1"></div>
+
+      <template x-if="view === 'course' && currentCourse">
+        <div class="hidden sm:flex items-center gap-3">
+          <div class="text-right">
+            <p class="text-xs text-inkfaint leading-none mb-1">Progress</p>
+            <p class="text-sm font-semibold text-ink leading-none" x-text="courseProgress(currentCourseId).pct + '%'"></p>
+          </div>
+          <div class="w-32 h-2 rounded-full bg-surface2 overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-accent to-emerald-400 tx" :style="`width:${courseProgress(currentCourseId).pct}%`"></div>
+          </div>
+        </div>
+      </template>
+
+      <button @click="goCatalog()"
+        class="ml-1 inline-flex items-center gap-1.5 px-3 h-9 rounded-lg bg-surface2 hover:bg-surface3 border border-edge/60 text-sm text-inkdim hover:text-ink tx">
+        <i class="ph ph-squares-four"></i><span class="hidden sm:inline">Catalog</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================== CATALOG VIEW ===================== -->
+  <main x-show="view === 'catalog'" x-transition.opacity class="flex-1">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+      <div class="mb-10">
+        <p class="text-accent text-sm font-semibold tracking-wider uppercase mb-2">Course Catalog</p>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-ink tracking-tight">Pick something to learn</h1>
+        <p class="text-inkdim mt-2 max-w-xl">Self-paced lessons with readings, quizzes, and flashcards. Your progress is saved automatically.</p>
+      </div>
+
+      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <template x-for="course in catalog" :key="course.id">
+          <button @click="openCourse(course.id)"
+            class="group text-left rounded-2xl bg-surface/80 border border-edge/50 p-5 hover:border-accent/60 hover:-translate-y-1 hover:shadow-2xl hover:shadow-accent/10 tx relative overflow-hidden">
+
+            <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-accent/5 group-hover:bg-accent/10 tx"></div>
+
+            <div class="flex items-start justify-between gap-3 relative">
+              <span class="grid place-items-center w-14 h-14 rounded-2xl bg-gradient-to-br from-surface3 to-surface2 border border-edge/60 text-accent text-3xl group-hover:scale-105 group-hover:text-accent2 tx">
+                <i :class="`ph-fill ph-${course.icon || 'book-open'}`"></i>
+              </span>
+              <div class="flex flex-col items-end gap-1.5">
+                <template x-if="courseProgress(course.id).pct === 100">
+                  <span class="inline-flex items-center gap-1 text-xs font-semibold text-accent bg-accent/10 px-2 py-1 rounded-full">
+                    <i class="ph-fill ph-check-circle"></i> Done
+                  </span>
+                </template>
+                <template x-if="courseWarnings(course.id) > 0">
+                  <span class="inline-flex items-center gap-1 text-xs font-semibold text-accent2 bg-amber-500/10 px-2 py-1 rounded-full">
+                    <i class="ph-fill ph-warning"></i>
+                    <span x-text="`${courseWarnings(course.id)} to review`"></span>
+                  </span>
+                </template>
+              </div>
+            </div>
+
+            <h3 class="mt-4 text-lg font-bold text-ink group-hover:text-accent tx" x-text="course.title"></h3>
+            <p class="mt-1.5 text-sm text-inkdim line-clamp-3" x-text="course.description"></p>
+
+            <div class="mt-4 flex flex-wrap gap-1.5">
+              <template x-for="tag in (course.tags || [])" :key="tag">
+                <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-surface2 text-inkfaint border border-edge/40" x-text="tag"></span>
+              </template>
+            </div>
+
+            <div class="mt-5">
+              <div class="flex items-center justify-between text-xs mb-1.5">
+                <span class="text-inkfaint" x-text="`${courseProgress(course.id).done} / ${courseProgress(course.id).total} steps`"></span>
+                <span class="font-semibold text-inkdim" x-text="courseProgress(course.id).pct + '%'"></span>
+              </div>
+              <div class="h-2 rounded-full bg-surface2 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-accent to-emerald-400 tx" :style="`width:${courseProgress(course.id).pct}%`"></div>
+              </div>
+            </div>
+
+            <div class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-accent">
+              <span x-text="courseProgress(course.id).pct > 0 ? 'Continue' : 'Start course'"></span>
+              <i class="ph-bold ph-arrow-right group-hover:translate-x-1 tx"></i>
+            </div>
+          </button>
+        </template>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===================== COURSE VIEW ===================== -->
+  <main x-show="view === 'course' && currentCourse" x-transition.opacity class="flex-1">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 lg:py-8 grid lg:grid-cols-[300px_1fr] gap-6">
+
+      <!-- Sidebar -->
+      <aside class="lg:sticky lg:top-24 lg:self-start">
+        <!-- mobile toggle -->
+        <button @click="sidebarOpen = !sidebarOpen"
+          class="lg:hidden w-full mb-3 flex items-center justify-between px-4 h-11 rounded-xl bg-surface2 border border-edge/60 text-ink">
+          <span class="flex items-center gap-2 text-sm font-semibold"><i class="ph ph-list-checks text-accent"></i> Course steps</span>
+          <i class="ph ph-caret-down tx" :class="sidebarOpen && 'rotate-180'"></i>
+        </button>
+
+        <div x-show="sidebarOpen || isDesktop" x-collapse
+          class="rounded-2xl bg-surface/70 border border-edge/50 overflow-hidden">
+          <div class="p-4 border-b border-edge/50">
+            <div class="flex items-center gap-2.5">
+              <span class="grid place-items-center w-10 h-10 rounded-xl bg-surface3 text-accent text-2xl">
+                <i :class="`ph-fill ph-${currentCourse?.icon || 'book-open'}`"></i>
+              </span>
+              <div class="min-w-0">
+                <h2 class="text-sm font-bold text-ink truncate" x-text="currentCourse?.title"></h2>
+                <p class="text-xs text-inkfaint" x-text="`${courseProgress(currentCourseId).done}/${courseProgress(currentCourseId).total} complete`"></p>
+              </div>
+            </div>
+          </div>
+
+          <nav class="p-2 max-h-[60vh] overflow-y-auto" x-ref="stepNav">
+            <template x-for="(step, idx) in steps" :key="step.id">
+              <button @click="goToStep(idx)"
+                :data-step-idx="idx"
+                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left tx group"
+                :class="idx === currentStepIndex ? 'bg-accent/10 ring-1 ring-accent/40' : 'hover:bg-surface2'">
+
+                <!-- status indicator -->
+                <span class="shrink-0 grid place-items-center w-7 h-7 rounded-lg text-lg"
+                  :class="stepBadgeClass(step)">
+                  <template x-if="gradeFor(step)">
+                    <span class="text-[11px] font-extrabold" x-text="gradeFor(step).letter"></span>
+                  </template>
+                  <template x-if="!gradeFor(step)">
+                    <i :class="stepBadgeIcon(step)"></i>
+                  </template>
+                </span>
+
+                <span class="min-w-0 flex-1">
+                  <span class="block text-sm font-medium truncate"
+                    :class="idx === currentStepIndex ? 'text-ink' : 'text-inkdim group-hover:text-ink'"
+                    x-text="step.title"></span>
+                  <span class="block text-[11px] text-inkfaint capitalize" x-text="stepTypeLabel(step)"></span>
+                </span>
+              </button>
+            </template>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Step content -->
+      <section class="min-w-0">
+        <div class="rounded-2xl bg-surface/60 border border-edge/50 overflow-hidden">
+
+          <!-- header strip -->
+          <div class="flex items-center gap-3 px-5 sm:px-7 py-4 border-b border-edge/50">
+            <span class="grid place-items-center w-9 h-9 rounded-lg bg-surface2 text-accent text-xl">
+              <i :class="`ph ph-${stepIcon(currentStep)}`"></i>
+            </span>
+            <div class="flex-1 min-w-0">
+              <p class="text-[11px] uppercase tracking-wider text-inkfaint font-semibold" x-text="stepTypeLabel(currentStep)"></p>
+              <p class="text-xs text-inkdim" x-text="`Step ${currentStepIndex + 1} of ${steps.length}`"></p>
+            </div>
+            <!-- mark read/unread -->
+            <template x-if="currentStep.type !== 'complete'">
+              <button @click="toggleRead(currentStep)"
+                class="inline-flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-semibold tx border"
+                :class="isCompleted(currentCourseId, currentStep.id)
+                  ? 'bg-accent/10 border-accent/40 text-accent hover:bg-accent/20'
+                  : 'bg-surface2 border-edge/60 text-inkdim hover:text-ink'">
+                <i :class="isCompleted(currentCourseId, currentStep.id) ? 'ph-fill ph-check-circle' : 'ph ph-circle'"></i>
+                <span x-text="isCompleted(currentCourseId, currentStep.id) ? 'Completed' : 'Mark complete'"></span>
+              </button>
+            </template>
+          </div>
+
+          <!-- body (re-mounts per step to retrigger entrance animation) -->
+          <div class="p-5 sm:p-8 lg:p-10">
+            <template x-for="s in [currentStep]" :key="currentStepIndex">
+              <div class="animate-slidein">
+
+                <!-- ---------- CONCEPT ---------- -->
+                <template x-if="s.type === 'concept'">
+                  <article>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight mb-5" x-text="s.title"></h1>
+                    <div class="prose-lms" x-html="renderMarkdown(s.content)" @click="onContentClick($event)"></div>
+                  </article>
+                </template>
+
+                <!-- ---------- MULTIPLE CHOICE ---------- -->
+                <template x-if="s.type === 'challenge' && s.kind === 'multiple-choice'">
+                  <article>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight mb-2" x-text="s.title"></h1>
+                    <p class="text-lg text-inkdim mb-6" x-text="s.question"></p>
+
+                    <div class="space-y-3">
+                      <template x-for="choice in s.choices" :key="choice.id">
+                        <button @click="!mc.submitted && (mc.selected = choice.id)"
+                          :disabled="mc.submitted"
+                          class="w-full flex items-center gap-3 text-left px-4 py-3.5 rounded-xl border tx"
+                          :class="mcChoiceClass(s, choice)">
+                          <span class="shrink-0 grid place-items-center w-7 h-7 rounded-lg border text-sm font-bold"
+                            :class="mcBulletClass(s, choice)">
+                            <template x-if="mc.submitted && choice.correct"><i class="ph-bold ph-check"></i></template>
+                            <template x-if="mc.submitted && !choice.correct && mc.selected === choice.id"><i class="ph-bold ph-x"></i></template>
+                            <template x-if="!(mc.submitted && (choice.correct || mc.selected === choice.id))"><span x-text="choice.id.toUpperCase()"></span></template>
+                          </span>
+                          <span class="text-sm sm:text-base text-ink" x-text="choice.text"></span>
+                        </button>
+                      </template>
+                    </div>
+
+                    <div class="mt-6 flex items-center gap-3">
+                      <button x-show="!mc.submitted" @click="submitMC(s)" :disabled="!mc.selected"
+                        class="inline-flex items-center gap-2 px-5 h-11 rounded-xl bg-accent text-night font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 tx">
+                        <i class="ph-bold ph-check-fat"></i> Submit answer
+                      </button>
+                      <button x-show="mc.submitted" @click="resetMC()"
+                        class="inline-flex items-center gap-2 px-4 h-11 rounded-xl bg-surface2 border border-edge/60 text-inkdim hover:text-ink font-semibold tx">
+                        <i class="ph ph-arrow-counter-clockwise"></i> Try again
+                      </button>
+                    </div>
+
+                    <!-- feedback -->
+                    <template x-if="mc.submitted">
+                      <div class="mt-5 rounded-xl border p-4 animate-popin"
+                        :class="mc.correct ? 'bg-accent/10 border-accent/40' : 'bg-amber-500/10 border-amber-500/40'">
+                        <p class="flex items-center gap-2 font-bold mb-1"
+                          :class="mc.correct ? 'text-accent' : 'text-accent2'">
+                          <i :class="mc.correct ? 'ph-fill ph-check-circle' : 'ph-fill ph-info'"></i>
+                          <span x-text="mc.correct ? 'Correct!' : 'Not quite — but keep going.'"></span>
+                        </p>
+                        <div class="prose-lms text-sm" x-html="renderMarkdown(s.explanation || '')"></div>
+                      </div>
+                    </template>
+                  </article>
+                </template>
+
+                <!-- ---------- FLASHCARDS ---------- -->
+                <template x-if="s.type === 'challenge' && s.kind === 'flashcards'">
+                  <article>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight mb-1" x-text="s.title"></h1>
+                    <p class="text-inkdim mb-6">Self-assessment — flip each card, guess, then grade yourself honestly.</p>
+
+                    <!-- in-progress -->
+                    <template x-if="!fc.finished">
+                      <div>
+                        <div class="flex items-center justify-between mb-4 text-sm">
+                          <span class="text-inkdim"><span class="font-bold text-ink" x-text="fc.queue.length"></span> remaining</span>
+                          <span class="text-inkfaint" x-text="`First-try correct: ${fc.firstTryCorrect} · Misses: ${fc.totalIncorrect}`"></span>
+                        </div>
+
+                        <div class="flip-scene mb-6">
+                          <div class="flip-card relative w-full min-h-[240px] cursor-pointer select-none"
+                            :class="fc.flipped && 'is-flipped'"
+                            @click="fc.flipped = !fc.flipped">
+                            <!-- front -->
+                            <div class="flip-face absolute inset-0 rounded-2xl border border-edge/60 bg-gradient-to-br from-surface2 to-surface p-7 grid place-items-center text-center">
+                              <div>
+                                <p class="text-[11px] uppercase tracking-widest text-accent font-bold mb-3">Prompt</p>
+                                <p class="text-xl sm:text-2xl font-semibold text-ink" x-text="currentCard(s)?.front"></p>
+                                <p class="mt-6 text-xs text-inkfaint flex items-center justify-center gap-1.5"><i class="ph ph-cursor-click"></i> Click to flip</p>
+                              </div>
+                            </div>
+                            <!-- back -->
+                            <div class="flip-face back absolute inset-0 rounded-2xl border border-accent/40 bg-gradient-to-br from-surface3 to-surface2 p-7 grid place-items-center text-center">
+                              <div>
+                                <p class="text-[11px] uppercase tracking-widest text-accent2 font-bold mb-3">Answer</p>
+                                <p class="text-lg sm:text-xl text-ink" x-text="currentCard(s)?.back"></p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- grading buttons (only once flipped) -->
+                        <div class="flex items-center justify-center gap-3" :class="!fc.flipped && 'opacity-40 pointer-events-none'">
+                          <button @click="gradeCard(s, false)"
+                            class="inline-flex items-center gap-2 px-5 h-12 rounded-xl bg-amber-500/15 border border-amber-500/40 text-accent2 font-bold hover:bg-amber-500/25 tx">
+                            <i class="ph-bold ph-x-circle"></i> Missed it
+                          </button>
+                          <button @click="gradeCard(s, true)"
+                            class="inline-flex items-center gap-2 px-5 h-12 rounded-xl bg-accent/15 border border-accent/40 text-accent font-bold hover:bg-accent/25 tx">
+                            <i class="ph-bold ph-check-circle"></i> Got it
+                          </button>
+                        </div>
+                      </div>
+                    </template>
+
+                    <!-- results -->
+                    <template x-if="fc.finished">
+                      <div class="text-center animate-popin">
+                        <div class="inline-grid place-items-center w-28 h-28 rounded-full mb-5"
+                          :class="gradeColorBg(fc.gradePct)">
+                          <span class="text-5xl font-extrabold" :class="gradeColorText(fc.gradePct)" x-text="letterGrade(fc.gradePct)"></span>
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-ink mb-1">Deck complete!</h2>
+                        <p class="text-inkdim mb-6" x-text="`You scored ${fc.gradePct}% on first-try recall.`"></p>
+
+                        <div class="grid grid-cols-2 gap-3 max-w-md mx-auto mb-6">
+                          <div class="rounded-xl bg-surface2 border border-edge/50 p-4">
+                            <p class="text-3xl font-extrabold text-accent" x-text="fc.firstTryCorrect"></p>
+                            <p class="text-xs text-inkfaint mt-1">First-try correct</p>
+                          </div>
+                          <div class="rounded-xl bg-surface2 border border-edge/50 p-4">
+                            <p class="text-3xl font-extrabold text-accent2" x-text="fc.totalIncorrect"></p>
+                            <p class="text-xs text-inkfaint mt-1">Total misses</p>
+                          </div>
+                        </div>
+
+                        <button @click="initFlashcards(s, true)"
+                          class="inline-flex items-center gap-2 px-5 h-11 rounded-xl bg-surface2 border border-edge/60 text-inkdim hover:text-ink font-semibold tx">
+                          <i class="ph ph-arrow-counter-clockwise"></i> Review again
+                        </button>
+                      </div>
+                    </template>
+                  </article>
+                </template>
+
+                <!-- ---------- COMPLETE ---------- -->
+                <template x-if="s.type === 'complete'">
+                  <article class="text-center py-6">
+                    <div class="inline-grid place-items-center w-24 h-24 rounded-3xl bg-gradient-to-br from-accent to-emerald-600 text-night text-5xl mb-6 shadow-2xl shadow-accent/30 animate-popin">
+                      <i class="ph-fill ph-trophy"></i>
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-ink tracking-tight mb-3">🎉 Course complete!</h1>
+                    <p class="text-lg text-inkdim max-w-lg mx-auto mb-2">
+                      You finished <span class="font-bold text-accent" x-text="currentCourse?.title"></span>. Nicely done.
+                    </p>
+                    <p class="text-inkfaint mb-8" x-text="`${courseProgress(currentCourseId).done} of ${courseProgress(currentCourseId).total} steps completed.`"></p>
+                    <div class="flex flex-wrap items-center justify-center gap-3">
+                      <button @click="goCatalog()" class="inline-flex items-center gap-2 px-6 h-12 rounded-xl bg-accent text-night font-bold hover:brightness-110 tx">
+                        <i class="ph-bold ph-squares-four"></i> Back to catalog
+                      </button>
+                      <button @click="resetCourse(currentCourseId)" class="inline-flex items-center gap-2 px-5 h-12 rounded-xl bg-surface2 border border-edge/60 text-inkdim hover:text-ink font-semibold tx">
+                        <i class="ph ph-arrow-counter-clockwise"></i> Reset course
+                      </button>
+                    </div>
+                  </article>
+                </template>
+
+              </div>
+            </template>
+          </div>
+
+          <!-- footer nav -->
+          <div class="flex items-center justify-between gap-3 px-5 sm:px-7 py-4 border-t border-edge/50 bg-surface/40">
+            <button @click="prev()" :disabled="currentStepIndex === 0"
+              class="inline-flex items-center gap-2 px-4 h-11 rounded-xl bg-surface2 border border-edge/60 text-inkdim hover:text-ink font-semibold disabled:opacity-30 disabled:cursor-not-allowed tx">
+              <i class="ph-bold ph-arrow-left"></i> <span class="hidden sm:inline">Previous</span>
+            </button>
+
+            <div class="flex items-center gap-1.5">
+              <template x-for="(step, idx) in steps" :key="'dot'+step.id">
+                <button @click="goToStep(idx)" class="w-2 h-2 rounded-full tx"
+                  :class="idx === currentStepIndex ? 'bg-accent w-5' : (isCompleted(currentCourseId, step.id) ? 'bg-accent/40' : 'bg-surface3')"></button>
+              </template>
+            </div>
+
+            <button @click="next()" :disabled="currentStepIndex >= steps.length - 1"
+              class="inline-flex items-center gap-2 px-5 h-11 rounded-xl bg-accent text-night font-bold hover:brightness-110 disabled:opacity-30 disabled:cursor-not-allowed tx">
+              <span x-text="currentStepIndex >= steps.length - 2 ? 'Finish' : 'Next'"></span> <i class="ph-bold ph-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- ===================== IMAGE LIGHTBOX ===================== -->
+  <div x-show="lightbox.open" x-transition.opacity
+    @click="closeLightbox()"
+    class="fixed inset-0 z-[70] overflow-y-auto bg-night/90 backdrop-blur-sm cursor-zoom-out">
+    <div class="min-h-full flex items-center justify-center p-4 sm:p-8">
+      <img :src="lightbox.src" :alt="lightbox.alt"
+        class="max-w-full h-auto rounded-xl shadow-2xl border border-edge/60 animate-popin" />
+    </div>
+    <button @click.stop="closeLightbox()"
+      class="fixed top-4 right-4 grid place-items-center w-11 h-11 rounded-full bg-surface2/80 border border-edge/60 text-ink hover:bg-surface3 tx"
+      aria-label="Close image">
+      <i class="ph-bold ph-x text-xl"></i>
+    </button>
+    <p x-show="lightbox.alt" x-text="lightbox.alt"
+      class="fixed bottom-5 left-1/2 -translate-x-1/2 max-w-[90%] text-center text-sm text-inkdim bg-night/70 px-3 py-1.5 rounded-lg"></p>
+  </div>
+</div>
+
+<!-- Alpine plugins + core (defer ensures lmsApp is defined first) -->
+<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<script>
+  const COURSES_DIR = './courses';
+  const STORAGE_KEY = 'lumen-lms-progress-v1';
+
+  function lmsApp() {
+    return {
+      // ---- core state ----
+      loading: true,
+      view: 'catalog',          // 'catalog' | 'course'
+      catalog: [],              // array of course metadata (full course objects)
+      courseCache: {},          // id -> parsed course (with appended complete step)
+      currentCourseId: null,
+      currentStepIndex: 0,
+      progress: {},             // persisted: { courseId: { steps: { stepId: {completed, gradePct, firstTryCorrect, totalIncorrect} } } }
+
+      sidebarOpen: false,
+      isDesktop: window.matchMedia('(min-width: 1024px)').matches,
+      _suppressMarkOnce: false,
+
+      // ---- image lightbox ----
+      lightbox: { open: false, src: '', alt: '' },
+
+      // ---- ephemeral challenge state (rebuilt when a step is shown) ----
+      mc: { selected: null, submitted: false, correct: false },
+      fc: { queue: [], flipped: false, attempts: {}, firstTryCorrect: 0, totalIncorrect: 0, finished: false, gradePct: 0 },
+
+      // ================= INIT =================
+      async init() {
+        this.loadProgress();
+        window.addEventListener('resize', () => { this.isDesktop = window.matchMedia('(min-width: 1024px)').matches; });
+        window.addEventListener('hashchange', () => this.applyRoute());
+        window.addEventListener('keydown', (e) => this.onKey(e));
+
+        await this.loadCatalog();
+        await this.applyRoute();
+        this.loading = false;
+      },
+
+      // ================= DATA LOADING =================
+      // Courses are listed in courses/catalog.yaml. A static manifest is used
+      // (rather than a directory listing) because hosts like GitHub Pages do
+      // not expose directory autoindex.
+      async loadCatalog() {
+        try {
+          const idx = jsyaml.load(await (await fetch(`${COURSES_DIR}/catalog.yaml`)).text());
+          const ids = idx.courses || [];
+          const loaded = await Promise.all(ids.map(id => this.loadCourse(id).catch(() => null)));
+          this.catalog = loaded.filter(Boolean);
+        } catch (e) {
+          console.error('Failed to load catalog', e);
+          this.catalog = [];
+        }
+      },
+
+      async loadCourse(id) {
+        if (this.courseCache[id]) return this.courseCache[id];
+        const course = jsyaml.load(await (await fetch(`${COURSES_DIR}/${id}.yaml`)).text());
+        course.steps = course.steps || [];
+        // auto-append the celebratory completion slide
+        course.steps.push({ id: '__complete__', type: 'complete', title: 'Course Complete' });
+        this.courseCache[id] = course;
+        return course;
+      },
+
+      // ================= ROUTING (hash) =================
+      // #/                         -> catalog
+      // #/course/:id               -> course, step 0
+      // #/course/:id/:stepId       -> course at step
+      async applyRoute() {
+        const hash = location.hash.replace(/^#\/?/, '');
+        const parts = hash.split('/').filter(Boolean);
+
+        if (parts[0] !== 'course' || !parts[1]) {
+          this.view = 'catalog';
+          this.currentCourseId = null;
+          return;
+        }
+
+        const id = parts[1];
+        const course = await this.loadCourse(id).catch(() => null);
+        if (!course) { this.view = 'catalog'; return; }
+
+        this.currentCourseId = id;
+        let idx = 0;
+        if (parts[2]) {
+          const found = course.steps.findIndex(s => s.id === parts[2]);
+          if (found >= 0) idx = found;
+        }
+        this.view = 'course';
+        this.currentStepIndex = idx;
+        this.enterStep();
+      },
+
+      // ================= NAVIGATION =================
+      goCatalog() { location.hash = '#/'; },
+
+      openCourse(id) {
+        const c = this.courseCache[id];
+        let idx = 0;
+        if (c) {
+          if (this.courseProgress(id).pct === 100) {
+            // already completed → jump straight to the celebratory final slide
+            idx = c.steps.length - 1;
+          } else {
+            // otherwise resume at the first incomplete step
+            const firstIncomplete = c.steps.findIndex(s => s.type !== 'complete' && !this.isCompleted(id, s.id));
+            if (firstIncomplete > 0) idx = firstIncomplete;
+          }
+        }
+        const stepId = c ? c.steps[idx].id : '';
+        location.hash = `#/course/${id}/${stepId}`;
+      },
+
+      goToStep(idx) {
+        if (idx < 0 || idx >= this.steps.length) return;
+        location.hash = `#/course/${this.currentCourseId}/${this.steps[idx].id}`;
+      },
+
+      // Wipe all saved progress for a course and return to its first step, so it
+      // looks untouched (also reflected on the catalog tile).
+      resetCourse(courseId) {
+        delete this.progress[courseId];
+        this.saveProgress();
+        this.resetMC();
+        this._suppressMarkOnce = true; // don't re-complete the landing step
+        location.hash = `#/course/${courseId}/${this.courseCache[courseId].steps[0].id}`;
+      },
+
+      next() { if (this.currentStepIndex < this.steps.length - 1) this.goToStep(this.currentStepIndex + 1); },
+      prev() { if (this.currentStepIndex > 0) this.goToStep(this.currentStepIndex - 1); },
+
+      onKey(e) {
+        if (e.key === 'Escape' && this.lightbox.open) { this.closeLightbox(); return; }
+        if (this.view !== 'course') return;
+        if (this.lightbox.open) return; // don't navigate slides while viewing an image
+        const tag = (e.target.tagName || '').toLowerCase();
+        if (tag === 'input' || tag === 'textarea') return;
+        if (e.key === 'ArrowRight') this.next();
+        if (e.key === 'ArrowLeft') this.prev();
+      },
+
+      // ================= IMAGE LIGHTBOX =================
+      // Delegated handler: clicking a rendered markdown image opens it fullscreen.
+      onContentClick(e) {
+        const img = e.target.closest('img');
+        if (!img) return;
+        this.openLightbox(img.currentSrc || img.src, img.alt || '');
+      },
+      openLightbox(src, alt) {
+        this.lightbox = { open: true, src, alt };
+        document.body.style.overflow = 'hidden';
+      },
+      closeLightbox() {
+        this.lightbox.open = false;
+        document.body.style.overflow = '';
+      },
+
+      // called whenever a step becomes active
+      enterStep() {
+        const s = this.currentStep;
+        if (!s) return;
+        this.sidebarOpen = false;
+
+        // visiting marks complete — unless we just reset the course, so the
+        // catalog shows it as never-taken until the user actually advances.
+        if (this._suppressMarkOnce) {
+          this._suppressMarkOnce = false;
+        } else {
+          this.markComplete(s.id, true, { keepGrade: true });
+        }
+
+        // reset / init challenge state
+        if (s.type === 'challenge' && s.kind === 'multiple-choice') this.restoreMC(s);
+        if (s.type === 'challenge' && s.kind === 'flashcards') this.initFlashcards(s, true);
+        if (s.type === 'complete') this.$nextTick(() => fireConfetti());
+
+        // scroll back to the top so long slides start at the beginning
+        this.$nextTick(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        // keep the active step visible in the sidebar checklist
+        this.$nextTick(() => this.scrollSidebarToCurrent());
+      },
+
+      scrollSidebarToCurrent() {
+        const nav = this.$refs.stepNav;
+        if (!nav) return;
+        const btn = nav.querySelector(`[data-step-idx="${this.currentStepIndex}"]`);
+        if (!btn) return;
+        // Adjust only the nav's own scroll position — never the window — so
+        // arriving at a permalink doesn't yank the whole page down.
+        const navRect = nav.getBoundingClientRect();
+        const btnRect = btn.getBoundingClientRect();
+        if (btnRect.top < navRect.top) {
+          nav.scrollTop -= (navRect.top - btnRect.top) + 8;
+        } else if (btnRect.bottom > navRect.bottom) {
+          nav.scrollTop += (btnRect.bottom - navRect.bottom) + 8;
+        }
+      },
+
+      // ================= GETTERS =================
+      get currentCourse() { return this.currentCourseId ? this.courseCache[this.currentCourseId] : null; },
+      get steps() { return this.currentCourse ? this.currentCourse.steps : []; },
+      get currentStep() { return this.steps[this.currentStepIndex] || {}; },
+
+      // ================= PROGRESS =================
+      loadProgress() {
+        try { this.progress = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+        catch { this.progress = {}; }
+      },
+      saveProgress() { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.progress)); },
+
+      ensureRecord(courseId, stepId) {
+        if (!this.progress[courseId]) this.progress[courseId] = { steps: {} };
+        if (!this.progress[courseId].steps[stepId]) this.progress[courseId].steps[stepId] = {};
+        return this.progress[courseId].steps[stepId];
+      },
+
+      markComplete(stepId, value, opts = {}) {
+        const rec = this.ensureRecord(this.currentCourseId, stepId);
+        rec.completed = value;
+        if (!opts.keepGrade && !value) { delete rec.gradePct; delete rec.firstTryCorrect; delete rec.totalIncorrect; }
+        this.saveProgress();
+      },
+
+      toggleRead(step) {
+        const done = this.isCompleted(this.currentCourseId, step.id);
+        this.markComplete(step.id, !done);
+      },
+
+      stepRecord(courseId, stepId) { return this.progress?.[courseId]?.steps?.[stepId] || null; },
+      isCompleted(courseId, stepId) { return !!this.stepRecord(courseId, stepId)?.completed; },
+
+      courseProgress(courseId) {
+        const course = this.courseCache[courseId];
+        if (!course) return { done: 0, total: 0, pct: 0 };
+        const real = course.steps.filter(s => s.type !== 'complete');
+        const total = real.length;
+        const done = real.filter(s => this.isCompleted(courseId, s.id)).length;
+        const pct = total ? Math.round((done / total) * 100) : 0;
+        return { done, total, pct };
+      },
+
+      // number of self-assessment steps completed with a less-than-perfect score
+      // (a wrong quiz answer or imperfect flashcard run). Shown as a warning on
+      // the catalog tile — can coexist with 100% course completion.
+      courseWarnings(courseId) {
+        const course = this.courseCache[courseId];
+        if (!course) return 0;
+        return course.steps.filter(s => this.stepStatusFor(courseId, s) === 'warn').length;
+      },
+
+      // grade info for a self-assessed step (flashcards), if completed
+      gradeFor(step) {
+        if (!(step.type === 'challenge' && step.kind === 'flashcards')) return null;
+        const rec = this.stepRecord(this.currentCourseId, step.id);
+        if (!rec || rec.gradePct === undefined || !rec.completed) return null;
+        return { pct: rec.gradePct, letter: this.letterGrade(rec.gradePct) };
+      },
+
+      // checklist status: 'todo' | 'pass' (perfect/green) | 'warn' (imperfect/yellow)
+      // Challenge steps require a perfect score (gradePct === 100) to be green.
+      // If a self-assessment is skipped or imperfect, it stays yellow until
+      // the user goes back and aces it.
+      stepStatusFor(courseId, step) {
+        const rec = this.stepRecord(courseId, step.id);
+        if (!rec || !rec.completed) return 'todo';
+        const isChallenge = step.type === 'challenge';
+        if (isChallenge && rec.gradePct !== 100) return 'warn';
+        if (rec.gradePct !== undefined && rec.gradePct < 100) return 'warn';
+        return 'pass';
+      },
+      stepStatus(step) {
+        return this.stepStatusFor(this.currentCourseId, step);
+      },
+
+      // ================= ICONS / LABELS =================
+      stepIcon(step) {
+        if (!step) return 'circle';
+        if (step.type === 'concept') return 'book-open-text';
+        if (step.type === 'complete') return 'trophy';
+        if (step.type === 'challenge') {
+          if (step.kind === 'flashcards') return 'cards';
+          if (step.kind === 'multiple-choice') return 'list-checks';
+          return 'exam';
+        }
+        return 'circle';
+      },
+      stepTypeLabel(step) {
+        if (!step) return '';
+        if (step.type === 'concept') return 'Reading';
+        if (step.type === 'complete') return 'Completion';
+        if (step.kind === 'flashcards') return 'Flashcards';
+        if (step.kind === 'multiple-choice') return 'Quiz';
+        return 'Challenge';
+      },
+      stepBadgeClass(step) {
+        const s = this.stepStatus(step);
+        if (s === 'pass') return 'bg-accent/15 text-accent';
+        if (s === 'warn') return 'bg-amber-500/15 text-accent2';
+        return 'bg-surface2 text-inkfaint';
+      },
+      stepBadgeIcon(step) {
+        const s = this.stepStatus(step);
+        if (s === 'pass') return 'ph-fill ph-check-circle';
+        if (s === 'warn') return 'ph-fill ph-warning';
+        return `ph ph-${this.stepIcon(step)}`;
+      },
+
+      // ================= MULTIPLE CHOICE =================
+      resetMC() { this.mc = { selected: null, submitted: false, correct: false }; },
+      // Restore a previously submitted answer (persisted in LocalStorage) so the
+      // slide reopens in the exact state the user last left it.
+      restoreMC(step) {
+        const rec = this.stepRecord(this.currentCourseId, step.id);
+        if (rec && rec.selectedChoice) {
+          const choice = step.choices.find(c => c.id === rec.selectedChoice);
+          this.mc = { selected: rec.selectedChoice, submitted: true, correct: !!(choice && choice.correct) };
+        } else {
+          this.resetMC();
+        }
+      },
+      submitMC(step) {
+        if (!this.mc.selected) return;
+        const choice = step.choices.find(c => c.id === this.mc.selected);
+        this.mc.correct = !!(choice && choice.correct);
+        this.mc.submitted = true;
+        // persist outcome + chosen answer: 100 = correct (green), 0 = wrong
+        // (yellow) until corrected. selectedChoice is restored on revisit.
+        const rec = this.ensureRecord(this.currentCourseId, step.id);
+        rec.completed = true;
+        rec.gradePct = this.mc.correct ? 100 : 0;
+        rec.selectedChoice = this.mc.selected;
+        this.saveProgress();
+      },
+      mcChoiceClass(step, choice) {
+        if (!this.mc.submitted) {
+          return this.mc.selected === choice.id
+            ? 'bg-accent/10 border-accent/50'
+            : 'bg-surface2/60 border-edge/50 hover:border-accent/40 hover:bg-surface2';
+        }
+        if (choice.correct) return 'bg-accent/10 border-accent/50';
+        if (this.mc.selected === choice.id) return 'bg-amber-500/10 border-amber-500/50';
+        return 'bg-surface2/40 border-edge/40 opacity-70';
+      },
+      mcBulletClass(step, choice) {
+        if (!this.mc.submitted) {
+          return this.mc.selected === choice.id ? 'bg-accent text-night border-accent' : 'border-edge text-inkfaint';
+        }
+        if (choice.correct) return 'bg-accent text-night border-accent';
+        if (this.mc.selected === choice.id) return 'bg-accent2 text-night border-accent2';
+        return 'border-edge text-inkfaint';
+      },
+
+      // ================= FLASHCARDS =================
+      initFlashcards(step, reshuffle) {
+        const n = (step.cards || []).length;
+        let order = Array.from({ length: n }, (_, i) => i);
+        if (reshuffle) order = this.shuffle(order);
+        this.fc = { queue: order, flipped: false, attempts: {}, firstTryCorrect: 0, totalIncorrect: 0, finished: n === 0, gradePct: 0 };
+      },
+      currentCard(step) {
+        const i = this.fc.queue[0];
+        return i === undefined ? null : step.cards[i];
+      },
+      gradeCard(step, correct) {
+        const cardIdx = this.fc.queue[0];
+        if (cardIdx === undefined) return;
+
+        if (correct) {
+          if (!this.fc.attempts[cardIdx]) this.fc.firstTryCorrect++;
+          this.fc.queue.shift(); // remove from deck
+        } else {
+          this.fc.attempts[cardIdx] = (this.fc.attempts[cardIdx] || 0) + 1;
+          this.fc.totalIncorrect++;
+          // reshuffle this card back into a random later position
+          this.fc.queue.shift();
+          const pos = 1 + Math.floor(Math.random() * Math.max(1, this.fc.queue.length));
+          this.fc.queue.splice(pos, 0, cardIdx);
+        }
+        this.fc.flipped = false;
+
+        if (this.fc.queue.length === 0) {
+          const total = (step.cards || []).length;
+          this.fc.gradePct = total ? Math.round((this.fc.firstTryCorrect / total) * 100) : 0;
+          this.fc.finished = true;
+          // persist grade
+          const rec = this.ensureRecord(this.currentCourseId, step.id);
+          rec.completed = true;
+          rec.gradePct = this.fc.gradePct;
+          rec.firstTryCorrect = this.fc.firstTryCorrect;
+          rec.totalIncorrect = this.fc.totalIncorrect;
+          this.saveProgress();
+          if (this.fc.gradePct >= 80) this.$nextTick(() => fireConfetti(900));
+        }
+      },
+      shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      },
+
+      // ================= GRADES =================
+      letterGrade(pct) {
+        if (pct >= 90) return 'A';
+        if (pct >= 80) return 'B';
+        if (pct >= 70) return 'C';
+        if (pct >= 60) return 'D';
+        return 'F';
+      },
+      gradeColorText(pct) {
+        if (pct >= 80) return 'text-accent';
+        if (pct >= 60) return 'text-accent2';
+        return 'text-danger';
+      },
+      gradeColorBg(pct) {
+        if (pct >= 80) return 'bg-accent/15';
+        if (pct >= 60) return 'bg-amber-500/15';
+        return 'bg-red-500/15';
+      },
+
+      // ================= MARKDOWN =================
+      renderMarkdown(md) {
+        if (!md) return '';
+        try { return marked.parse(this.embedVideos(md), { breaks: true }); }
+        catch { return md; }
+      },
+
+      // Turn a lone YouTube URL on its own line into a responsive embed.
+      // e.g.  https://www.youtube.com/watch?v=ID  or  https://youtu.be/ID
+      // Also handles bare Twitter/X status URLs on their own line.
+      embedVideos(md) {
+        const yt = /^\s*(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})(?:[^\s]*)?\s*$/i;
+        const tw = /^\s*(https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/\w+\/status\/\d+(?:\/video\/\d+)?(?:\?[^\s]*)?)\s*$/i;
+        return md.split('\n').map(line => {
+          // YouTube
+          const ym = line.match(yt);
+          if (ym) {
+            const id = ym[1];
+            return `\n<div class="video-embed"><iframe src="https://www.youtube-nocookie.com/embed/${id}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>\n`;
+          }
+          // Twitter/X — render via blockquote + widget script
+          const tm = line.match(tw);
+          if (tm) {
+            const url = tm[1].split('/video/')[0]; // normalise to status URL
+            setTimeout(() => { if(typeof _loadTwitterWidget==='function') _loadTwitterWidget(); }, 0);
+            return `\n<div class="tweet-embed"><blockquote class="twitter-tweet" data-dnt="true" data-theme="dark"><a href="${url}"></a></blockquote></div>\n`;
+          }
+          return line;
+        }).join('\n');
+      },
+    };
+  }
+
+  // ================= CONFETTI =================
+  let confettiRAF = null;
+  function fireConfetti(duration = 2600) {
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const resize = () => { canvas.width = innerWidth * dpr; canvas.height = innerHeight * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+    resize();
+    const colors = ['#34d399', '#f59e0b', '#22d3ee', '#a3e635', '#fb7185', '#ffffff'];
+    const N = 160;
+    const parts = Array.from({ length: N }, () => ({
+      x: Math.random() * innerWidth,
+      y: -20 - Math.random() * innerHeight * 0.5,
+      r: 4 + Math.random() * 7,
+      c: colors[Math.floor(Math.random() * colors.length)],
+      vx: -2 + Math.random() * 4,
+      vy: 2 + Math.random() * 4,
+      rot: Math.random() * Math.PI,
+      vr: -0.2 + Math.random() * 0.4,
+      shape: Math.random() > 0.5 ? 'rect' : 'circ',
+    }));
+    const start = performance.now();
+    if (confettiRAF) cancelAnimationFrame(confettiRAF);
+    function frame(t) {
+      const elapsed = t - start;
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      parts.forEach(p => {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.rot += p.vr;
+        ctx.save();
+        ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.fillStyle = p.c;
+        ctx.globalAlpha = Math.max(0, 1 - elapsed / duration);
+        if (p.shape === 'rect') ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 1.6);
+        else { ctx.beginPath(); ctx.arc(0, 0, p.r / 1.6, 0, Math.PI * 2); ctx.fill(); }
+        ctx.restore();
+      });
+      if (elapsed < duration) confettiRAF = requestAnimationFrame(frame);
+      else ctx.clearRect(0, 0, innerWidth, innerHeight);
+    }
+    confettiRAF = requestAnimationFrame(frame);
+  }
+</script>
+</body>
+</html>

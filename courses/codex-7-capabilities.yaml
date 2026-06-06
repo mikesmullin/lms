@@ -1,0 +1,381 @@
+id: codex-7-capabilities
+title: "Codex: 7 Capabilities of an AI Super App"
+description: Learn the seven core capabilities of OpenAI's Codex — from full file access and persistent memory to browser control and automations.
+icon: lightning
+version: "1.0"
+tags:
+  - AI
+  - Codex
+  - Agents
+  - Productivity
+
+steps:
+  - id: intro
+    type: concept
+    title: What is Codex?
+    content: |
+      **Codex** is OpenAI's AI agent super app — a clean, powerful interface for
+      agents that can fully control your computer.
+
+      At first glance it resembles ChatGPT or Claude, but there is a critical
+      difference: **everything lives on your machine**. Files you give Codex and
+      files Codex creates are stored on your local computer — not in the cloud.
+
+      This makes Codex suitable for serious knowledge work and coding work:
+      creating landing pages, building apps, processing documents, controlling
+      your browser, and scheduling recurring tasks.
+
+      ### The 7 capabilities covered in this course
+
+      | # | Capability | What it unlocks |
+      |---|-----------|-----------------|
+      | 1 | Full File Access | Agent reads/writes any file on your computer |
+      | 2 | Persistent Memory | Agent remembers your preferences across sessions |
+      | 3 | Plugins | Connect Codex to Slack, Gmail, Notion, and 100+ tools |
+      | 4 | Skills | Reusable SOP recipes your agent can run on demand |
+      | 5 | GPT Image Access | Generate world-class images directly inside Codex |
+      | 6 | Browser & Computer Use | Agent controls your keyboard, mouse, and browser |
+      | 7 | Automations | Schedule any task to run daily, weekly, or hourly |
+
+      Watch the full video this course is based on:
+
+      https://x.com/rileybrown/status/2049285752866107856
+
+  - id: capability-1-file-access
+    type: concept
+    title: "Capability 1: Full File Access"
+    content: |
+      Unlike ChatGPT or Claude — where uploaded files are stored in OpenAI's or
+      Anthropic's cloud — **Codex agents have full access to your local file
+      system**.
+
+      This means:
+
+      - Files you give the agent exist on your disk
+      - Files the agent creates are written directly to your disk
+      - The agent can browse, read, write, and delete any file on your computer
+
+      ### Working in Projects
+
+      The recommended way to stay organized is to use **Projects**. A project
+      maps to a folder on your computer:
+
+      1. Click **New Project** → **Start at existing folder**
+      2. Pick or create a folder (e.g. `~/Documents/my-project`)
+      3. Every chat inside that project saves its output files to that folder
+
+      You can **@ mention** any file within the project folder so the agent can
+      read it and build on it.
+
+      ### Multitasking
+
+      You can run multiple chats in parallel inside Codex — each one is an
+      independent agent working on its own task simultaneously.
+
+      > **Real-world example:** Drop 60 receipt photos into a folder, ask Codex
+      > to OCR them and build a categorized Excel workbook with charts. The
+      > finished spreadsheet lives in your project folder, ready to open.
+
+  - id: quiz-file-access
+    type: challenge
+    kind: multiple-choice
+    title: Check Your Understanding — File Access
+    question: Where are files created by Codex stored?
+    choices:
+      - id: a
+        text: In OpenAI's cloud storage, like ChatGPT
+      - id: b
+        text: In a temporary session that is deleted when the chat closes
+      - id: c
+        text: On your local computer, inside the project folder you specify
+        correct: true
+      - id: d
+        text: In a GitHub repository that Codex manages automatically
+    explanation: |
+      Codex stores everything locally. That is what separates it from ChatGPT
+      and Claude — you own and control all the files the agent creates.
+
+  - id: capability-2-memory
+    type: concept
+    title: "Capability 2: Persistent Memory"
+    content: |
+      Codex has two types of memory that persist across sessions.
+
+      ### Manual Memory — `agents.md`
+
+      You instruct the agent to remember something:
+
+      > *"From now on, whenever I ask for a landing page and don't specify
+      > styling, please use this sidebar + table-of-contents format."*
+
+      Codex writes this preference into a file called **`agents.md`** inside
+      your project (or a global one). You can open and edit it like any other
+      file.
+
+      The `agents.md` file is **your** document — keep it updated as your
+      preferences evolve. You can ask the agent to update it, or edit it yourself.
+
+      ### Auto Memory — `codex/memories/`
+
+      Codex also maintains an automatic memory file that it updates on its own.
+      This file records patterns it notices about your work over time.
+
+      - **Do not manually edit** this file — let the agent manage it
+      - You can *read* it periodically to see what the agent has learned about you
+      - Ask the agent: *"Tell me what you have in the `codex/memories` folder"*
+
+      > **Tip:** The combination of manual + auto memory means Codex gets
+      > progressively better at working with you the longer you use it.
+
+  - id: capability-3-plugins
+    type: concept
+    title: "Capability 3: Plugins"
+    content: |
+      **Plugins** are installable, reusable bundles that connect Codex to
+      external tools, apps, and workflows.
+
+      There are over **100 plugins** available, including:
+
+      - **Gmail** — read and send email from your account
+      - **Slack** — post messages or read channels
+      - **Notion** — access your pages and databases
+      - **Computer Use** — full keyboard/mouse control (covered in Capability 6)
+      - **Browser Use** — control a browser window
+
+      ### How to use a plugin
+
+      In your chat prompt, type **`@`** followed by the plugin name:
+
+      ```
+      @Gmail  find all brand sponsorship offers from the past two weeks
+             and summarize them in a table with research notes
+      ```
+
+      The `@` menu shows all installed plugins, so you never have to remember
+      exact names.
+
+      ### Plugins can run in parallel
+
+      Because Codex supports multiple simultaneous chats, you can have one chat
+      working with `@Gmail` while another uses `@Notion` — both agents running
+      at the same time.
+
+  - id: capability-4-skills
+    type: concept
+    title: "Capability 4: Skills"
+    content: |
+      **Skills** are reusable workflow recipes (think: SOPs) that your agent
+      can execute on demand. They live as Markdown instruction files inside
+      `plugins/skills/` on your computer.
+
+      ### Skills vs Plugins
+
+      | | Plugins | Skills |
+      |-|---------|--------|
+      | Invoked with | `@plugin-name` | `/skill-name` |
+      | What they are | External service connections | Instruction files (SOPs) |
+      | Who creates them | OpenAI / third parties | You (or the agent) |
+      | Stored | In Codex's plugin registry | Locally as `.md` files |
+
+      ### Two ways to create a skill
+
+      **Option A — Prompt to skill** (quick but less refined):
+      > *"Create a skill called brand-deal-analysis that does X."*
+
+      **Option B — Manual workflow method** (recommended):
+      1. Ask the agent to do the task
+      2. Review and iterate until you love the output
+      3. Tell the agent: *"I'm happy with this output — turn it into a skill"*
+      4. The agent reverse-engineers the workflow into a reusable skill file
+
+      ### Skills are living documents
+
+      Every time you use a skill and discover something better, just say:
+      > *"I love that formatting — please update the skill to always do it
+      > this way."*
+
+      Skills improve with use.
+
+  - id: quiz-plugins-vs-skills
+    type: challenge
+    kind: multiple-choice
+    title: Check Your Understanding — Plugins vs Skills
+    question: You want Codex to scan your Gmail for new partnership emails every time you need it. What is the best approach?
+    choices:
+      - id: a
+        text: Use the @Gmail plugin directly every time in a new prompt
+      - id: b
+        text: Create a skill that wraps the Gmail plugin workflow so you can invoke it with /brand-deal-researcher
+        correct: true
+      - id: c
+        text: Build a custom plugin from scratch in code
+      - id: d
+        text: Plugins cannot be combined with other features
+    explanation: |
+      Skills are the right tool here. You iterate on the Gmail task once until
+      you love the output, then tell the agent to turn it into a skill. From
+      then on you invoke the whole workflow with a single /slash command.
+
+  - id: capability-5-image-gen
+    type: concept
+    title: "Capability 5: GPT Image Access"
+    content: |
+      Codex includes built-in access to **GPT-image-2** — OpenAI's
+      state-of-the-art image generation model — directly inside the agent
+      interface.
+
+      ### How it works
+
+      Image generation is exposed as a built-in **skill** (not a plugin).
+      You can see it in **Plugins → Skills → image-gen**.
+
+      You do not need to enable anything — just describe what you want:
+
+      > *"Generate 5 product photos of this sweater worn by models of different
+      > nationalities. Three images should have one person, one should have
+      > three, and the last should have five."*
+
+      ### Output
+
+      Generated images are saved to your project folder on disk, just like any
+      other Codex output. From there you can use them in presentations, landing
+      pages, or export to Canva — all without leaving Codex.
+
+  - id: capability-6-browser-computer
+    type: concept
+    title: "Capability 6: Browser & Computer Use"
+    content: |
+      Codex agents can **physically control your computer** — moving the mouse,
+      clicking buttons, typing into apps, and navigating the browser — just like
+      a human operator.
+
+      ### Computer Use (`@computer-use`)
+
+      Invoked via the `@computer-use` plugin. The agent sees your screen and
+      issues mouse and keyboard commands to control any app.
+
+      > *"Open Canva, create a new presentation, and place each of these 5
+      > images on separate slides."*
+
+      ### Browser Use (`@browser-use`)
+
+      Opens a browser window inside Codex. Useful for:
+
+      - Testing web apps the agent just built
+      - Navigating sites to gather information
+      - Verifying that all buttons, forms, and navigation work correctly
+
+      > *"Turn this HTML file into an interactive app, then use @browser-use
+      > to test all the buttons and navigation."*
+
+      ### What this means
+
+      Any task a human can do with a keyboard, mouse, and screen can now be
+      delegated to a Codex agent. This capability is improving rapidly.
+
+  - id: capability-7-automations
+    type: concept
+    title: "Capability 7: Automations"
+    content: |
+      The final capability ties everything together: **Automations** let you
+      schedule any Codex task to run on a recurring basis.
+
+      ### Creating an automation
+
+      Simply tell the agent when to run:
+
+      > *"Please do this every Friday at 9 AM and update this sheet."*
+
+      Codex creates a scheduled automation entry visible in the **Automations
+      tab**. You can see:
+
+      - The schedule (e.g. *Fridays at 9:00 AM*)
+      - Whether it is active or paused
+      - The last run time and next scheduled run
+      - Which skill or workflow it executes
+
+      ### Use cases
+
+      | Frequency | Example |
+      |-----------|---------|
+      | Daily | Summarise overnight emails into a Slack digest |
+      | Weekly | Scan Gmail for brand deals, update a spreadsheet |
+      | Hourly | Monitor a feed and flag items matching your criteria |
+      | Monthly | Generate a performance report from your project data |
+
+      Automations transform Codex from a tool you chat with into a **background
+      agent that handles recurring knowledge work** without you having to
+      remember to ask.
+
+  - id: bonus-chronicle
+    type: concept
+    title: "Bonus: Chronicle"
+    content: |
+      **Chronicle** is an experimental Codex feature (Settings → Personalization
+      → Chronicle research preview) that takes it one step further.
+
+      ### What it does
+
+      Chronicle **continuously screenshots your screen** and gives the agent
+      persistent visual context about what you have been working on.
+
+      When you invoke Chronicle in a prompt:
+      > *"Use Chronicle — tell me what I should add to my presentation."*
+
+      The agent can:
+      - Pull recent screenshots of your screen
+      - See what applications and documents you have open
+      - Understand the context of your current work without you describing it
+
+      ### How to use it
+
+      Just say **"use Chronicle"** in your prompt. The agent will check the
+      latest screen state and use that context in its response.
+
+      ### Note on privacy
+
+      Chronicle is invasive by design — it records your screen continuously.
+      Enable it only if you are comfortable with that trade-off. The data stays
+      local, but you should be aware of what is on screen when it is running.
+
+  - id: flashcard-review
+    type: challenge
+    kind: flashcards
+    title: Codex Capabilities — Flashcard Review
+    cards:
+      - front: What makes Codex different from ChatGPT in terms of file storage?
+        back: Codex stores all files locally on your computer. ChatGPT and Claude store files in the cloud.
+      - front: What is the `agents.md` file?
+        back: The manual memory file. You or the agent write your preferences and working style here so the agent remembers them across sessions.
+      - front: How do you invoke a plugin in Codex?
+        back: Type @ followed by the plugin name (e.g. @Gmail). The @ menu shows all installed plugins.
+      - front: How do you invoke a skill in Codex?
+        back: Type / followed by the skill name (e.g. /brand-deal-researcher).
+      - front: What is the recommended way to create a high-quality skill?
+        back: Use the manual workflow method — iterate with the agent until you love the output, then say "turn this into a skill." Reverse-engineering a real output produces better instructions than writing a skill from scratch.
+      - front: What does the @computer-use plugin allow?
+        back: Full physical control of your computer — the agent moves the mouse, clicks buttons, and types into any application.
+      - front: What is an Automation in Codex?
+        back: A scheduled recurring task. You tell the agent "do this every Friday at 9 AM" and Codex creates a scheduled job that runs the workflow automatically.
+      - front: What is Chronicle?
+        back: An experimental feature that continuously screenshots your screen to give the agent persistent visual context about what you are working on.
+
+  - id: final-quiz
+    type: challenge
+    kind: multiple-choice
+    title: Final Check — Codex Architecture
+    question: A colleague wants Codex to analyse their inbox every Monday morning and post a summary to Slack. Which combination of Codex capabilities makes this possible?
+    choices:
+      - id: a
+        text: Skills only — write a skill that does everything internally
+      - id: b
+        text: Plugins (@Gmail + @Slack) combined with an Automation (weekly schedule)
+        correct: true
+      - id: c
+        text: Browser Use — have the agent log in to Gmail and Slack via the browser
+      - id: d
+        text: Chronicle — it watches the screen and auto-posts when it sees emails
+    explanation: |
+      The Gmail and Slack plugins give the agent access to those services.
+      Wrapping the workflow in a skill makes it reusable, and an Automation
+      runs it every Monday at the scheduled time — no manual trigger needed.
