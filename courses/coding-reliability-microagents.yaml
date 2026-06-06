@@ -1,0 +1,376 @@
+id: coding-reliability-microagents
+title: "Coding Reliability with Microagents"
+description: "Learn the engineering patterns that make production coding agents reliable: prompts, context, state, control flow, human handoffs, and small focused microagents."
+icon: shield-check
+version: "1.0"
+tags:
+  - AI
+  - Agents
+  - Reliability
+  - Microagents
+  - Software Engineering
+
+steps:
+  - id: intro-video
+    type: concept
+    title: Why Reliable Agents Need Better Engineering
+    content: |
+      Production agents become reliable when they are engineered as software systems, not treated as magical autonomous beings. The core idea is simple:
+
+      > Most production agents are not magical autonomous beings. They are mostly software systems with a small amount of LLM logic embedded in the right places.
+
+      Watch the video. The remainder of the course will break it down in detail.
+
+      https://www.youtube.com/watch?v=8kMaTybvDUw
+
+      By the end of this course you will be able to:
+
+      - Explain why many agent frameworks stall at the 70-80% quality bar
+      - Distinguish **prompt engineering**, **context engineering**, and the
+        broader reliability layer around them
+      - Describe why **small focused microagents** often beat one giant agent
+      - Apply practical patterns like owning prompts, context, state, control
+        flow, and human handoffs
+
+  - id: not-every-problem-needs-agent
+    type: concept
+    title: Not Every Problem Needs an Agent
+    content: |
+      **Some problems should just be code**.
+
+      A useful example is a DevOps agent that inspects a `Makefile` and run the correct build steps. When it failed, the first instinct was to keep improving the prompt with more detail, more ordering, and more instructions.
+
+      Eventually the obvious conclusion appeared:
+
+      > If the workflow is already fully known and deterministic, a short bash script is better than an agent.
+
+      ### Reliability starts with the right problem choice
+
+      Before adding an agent, ask:
+
+      | Question | If the answer is yes... |
+      |----------|-------------------------|
+      | Is the workflow fully known? | Prefer deterministic code |
+      | Is the sequence fixed? | Prefer a script or DAG |
+      | Is there ambiguity or judgment? | Add an LLM where judgment is needed |
+      | Does it require back-and-forth with humans or messy inputs? | An agent adds value |
+
+      The goal is not to make everything "agentic". The goal is to use LLMs only where they create real leverage.
+
+  - id: from-agents-to-patterns
+    type: concept
+    title: From Big Agents to Reliability Patterns
+    content: |
+      Across production systems, the pattern is consistent:
+
+      > The best production agents are *not* highly agentic. They are mostly just software systems using a few specific LLM patterns well.
+
+      These teams were not doing greenfield rewrites or inventing entirely new architectures. Instead, they were applying **small modular concepts** to existing systems.
+
+      ### The big shift
+
+      Instead of asking:
+
+      - "How do I build a huge autonomous agent?"
+
+      teams were asking:
+
+      - "Where should an LLM sit inside this workflow?"
+      - "What state should remain deterministic?"
+      - "How do we make failures recoverable?"
+      - "Where do humans need to stay in the loop?"
+
+      This is best understood as a **12-factor model for agents**: not a single framework, but a set of engineering principles for getting reliable behaviour in production.
+
+  - id: prompt-vs-context
+    type: concept
+    title: Prompt Engineering vs Context Engineering
+    content: |
+      Reliable agent systems depend on a clear distinction:
+
+      ### Prompt engineering
+
+      Prompt engineering is about the **tokens that define the model's role and instructions**:
+
+      - who the agent is
+      - what it should optimize for
+      - what tone or persona it should adopt
+      - what format it should return
+
+      To push quality past a certain bar, you eventually need to own every token in that prompt.
+
+      ### Context engineering
+
+      Context engineering is about **how you build the context window** around the prompt:
+
+      - memory
+      - history
+      - retrieved documents
+      - tool results
+      - state serialized from earlier workflow steps
+
+      ### The practical difference
+
+      | Layer | Main question |
+      |-------|---------------|
+      | Prompt engineering | "What should the model be told to do?" |
+      | Context engineering | "What information should the model see right now?" |
+
+      Both matter, but **context quality often dominates agent reliability**. LLMs are still effectively stateless functions: token in, token out.
+
+  - id: own-prompts-context
+    type: concept
+    title: Own Your Prompts and Own Your Context
+    content: |
+      A major reliability pattern is **ownership**.
+
+      ### Own your prompts
+
+      Prompt-generation tools can get you a strong starting point, but once you care deeply about quality, you need direct control. If reliability depends on the quality of tokens going in, then prompt design cannot remain a black box hidden inside a deep framework stack.
+
+      ### Own your context building
+
+      The same is true for context. If your agent is receiving:
+
+      - previous messages
+      - RAG results
+      - memory
+      - tool outputs
+      - state from earlier workflow steps
+
+      then you want to control **how that information is serialized**, **how dense it is**, and **how clearly it communicates the current task**.
+
+      The rule of thumb is blunt:
+
+      > If you are not looking closely at the tokens going into the model, you are leaving quality on the table.
+
+      This is where prompt engineering and context engineering stop being theory and become software craftsmanship.
+
+  - id: quiz-reliability-foundations
+    type: challenge
+    kind: multiple-choice
+    title: Check Your Understanding — Reliability Foundations
+    question: Which combination best matches strong reliability engineering for agent systems?
+    choices:
+      - id: a
+        text: Use a larger agent framework, add more tools, and trust the framework's hidden prompt and state handling
+      - id: b
+        text: Treat every workflow as an agent problem, since deterministic code is too rigid
+      - id: c
+        text: Use agents only where they create leverage, and own the prompts and context that drive model quality
+        correct: true
+      - id: d
+        text: Focus only on prompt wording because context engineering has little effect on reliability
+    explanation: |
+      Reliability starts with good problem selection and explicit ownership. Not every task needs an agent, and when an LLM is in the loop, prompt quality and context quality both need to be engineered deliberately.
+
+  - id: own-control-flow-state
+    type: concept
+    title: Own Control Flow and State
+    content: |
+      Agent reliability improves when you stop outsourcing the inner loop.
+
+      ### Own the control flow
+
+      If you control the loop that runs the model, you can decide:
+
+      - when to continue
+      - when to stop
+      - when to summarize
+      - when to retry
+      - when to switch modes
+      - when to ask for human input
+
+      That flexibility disappears when the real behavior is buried seven layers down inside a framework call stack.
+
+      ### Own the state
+
+      There are two kinds of state:
+
+      | State type | Examples |
+      |------------|----------|
+      | Execution state | current step, next step, retry count |
+      | Business state | messages, user-visible data, approvals, pending work |
+
+      If you own that state, you can do things normal software systems do well:
+
+      - pause workflows
+      - resume workflows
+      - serialize state to a database
+      - attach an agent to a REST API or MCP server
+      - let long-running tools complete asynchronously
+
+      The agent does not need to know about all of that infrastructure. It just receives the right state at the right moment.
+
+  - id: error-handling-context
+    type: concept
+    title: Error Handling Is Context Engineering Too
+    content: |
+      **Bad error handling can destroy an agent's context window**.
+
+      A common anti-pattern is this:
+
+      1. Tool call fails
+      2. You dump the full stack trace into the context
+      3. The model tries again with all the old failures still attached
+      4. The agent spirals, loses context, and gets stuck
+
+      ### Better pattern
+
+      When a tool fails, you should not blindly append everything to context.
+      Instead:
+
+      - summarize the failure
+      - clear stale errors once a valid tool call succeeds
+      - give the model only the information that helps it make the next decision
+
+      > Context engineering is not just adding information. It is also removing, compressing, and cleaning information so the next generation step stays clear.
+
+      This is a reliability pattern because it prevents the model from drowning in irrelevant diagnostic noise.
+
+  - id: humans-as-tools
+    type: concept
+    title: Humans as First-Class Workflow Steps
+    content: |
+      Many systems avoid the decision between **tool call** and **message to a human**, even though that is one of the most valuable design choices in agent systems.
+
+      ### Why this matters
+
+      When you allow an agent to contact a human as part of its workflow, you unlock behaviors like:
+
+      - asking for clarification
+      - requesting approval
+      - escalating ambiguous cases
+      - negotiating the next step in natural language
+
+      Treat human interaction as a real workflow primitive, not an awkward fallback.
+
+      ### Meet users where they already are
+
+      People do not want seven separate chat tabs open for seven agents.
+      Reliable systems often let agents interact through the tools people already use:
+
+      - email
+      - Slack
+      - Discord
+      - SMS
+
+      The pattern here is simple: the agent should enter the user's workflow, not force the user into a new one.
+
+  - id: microagents
+    type: concept
+    title: Small Focused Agents Beat Giant General Ones
+    content: |
+      The clearest reliability recommendation is this:
+
+      > Use **microagents**.
+
+      Instead of one large agent handling a huge task with a massive context window and a long chain of tools, use a **mostly deterministic workflow** with **small agent loops** inserted at the places where judgment is needed.
+
+      ### The recommended shape
+
+      | Part of system | Best fit |
+      |----------------|----------|
+      | Repetitive, fixed workflow | Deterministic code / DAG |
+      | Small ambiguous decision | Tiny agent loop |
+      | Approval or clarification | Human step |
+      | Post-decision execution | Deterministic code again |
+
+      A practical deployment example looks like this:
+
+      - CI/CD pipeline remains deterministic
+      - after tests pass, a model proposes the next deployment step
+      - a human can override or approve that step
+      - once decided, the workflow returns to deterministic execution
+      - if something fails, a small rollback agent handles the exception path
+
+      This keeps context manageable, responsibilities clear, and failures isolated.
+
+  - id: quiz-microagents
+    type: challenge
+    kind: multiple-choice
+    title: Check Your Understanding — Microagents
+    question: Which architecture best matches reliable production agent design?
+    choices:
+      - id: a
+        text: One giant agent with 100 tools and a huge open-ended loop that handles everything itself
+      - id: b
+        text: A mostly deterministic workflow with small 3-10 step agent loops inserted only where judgment is needed
+        correct: true
+      - id: c
+        text: A fully manual workflow with no LLM involvement at all
+      - id: d
+        text: A single prompt that contains every instruction, tool definition, and failure mode up front
+    explanation: |
+      Microagents are small focused loops inside a larger deterministic system. That gives you manageable context, clear responsibilities, easier debugging, and better reliability.
+
+  - id: stateless-agents
+    type: concept
+    title: Treat Agents as Stateless Functions
+    content: |
+      One of the most useful mental models is this:
+
+      > LLMs are stateless functions.
+
+      That means the model itself should not be trusted to own long-lived state. Your software should own state, control flow, retries, approvals, and orchestration.
+
+      ### What this changes
+
+      If you adopt this model, then your engineering priorities become:
+
+      - put the right tokens into context
+      - structure the workflow clearly
+      - persist state outside the model
+      - keep the agent loops small and inspectable
+      - engineer reliability at the system layer
+
+      This is why strong agent systems push back on frameworks that try to abstract away the "hard AI parts." The better approach is:
+
+      - tools should remove the boring infrastructure work
+      - engineers should spend their time on prompts, context, and flow quality
+
+      Reliable agents are not accidents. They are designed systems.
+
+  - id: flashcards-reliability
+    type: challenge
+    kind: flashcards
+    title: Reliability Patterns — Flashcard Review
+    cards:
+      - front: What quality ceiling do many early agent systems hit before reliability problems become obvious?
+        back: Around 70-80%. They demo well, but production reliability gaps show up after that.
+      - front: What is prompt engineering in this course?
+        back: Designing the tokens that define the model's instructions, persona, and output behavior.
+      - front: What is context engineering in this course?
+        back: Designing how memory, history, tool results, retrieved data, and workflow state are assembled into the model's context window.
+      - front: Why should you own your prompts and context instead of hiding them behind a framework?
+        back: Because agent quality depends directly on the tokens going into the model. If you do not control them, you lose reliability and flexibility.
+      - front: What two broad categories of state matter in reliable agent systems?
+        back: Execution state (current step, retries, next step) and business state (messages, approvals, user-facing data, pending work).
+      - front: Why is blindly dumping tool errors into context a bad pattern?
+        back: It clutters the context window, causes the model to spiral, and can make the agent lose track of what matters next.
+      - front: What is a microagent?
+        back: A small focused agent loop, typically inside a larger deterministic workflow, used only where judgment or interpretation is needed.
+      - front: What is the core architectural recommendation?
+        back: Use mostly deterministic workflows with small agent loops, explicit state, explicit control flow, and clear human handoffs.
+      - front: How should humans be treated in reliable agent systems?
+        back: As first-class workflow steps that the agent can contact for clarification, approval, or escalation.
+      - front: What is the final mental model for LLMs?
+        back: They are stateless functions. The surrounding software should own state, orchestration, retries, and reliability.
+
+  - id: final-quiz
+    type: challenge
+    kind: multiple-choice
+    title: Final Check — Reliability with Microagents
+    question: What is the strongest reason to use microagents instead of one huge coding agent?
+    choices:
+      - id: a
+        text: Microagents eliminate the need for deterministic code
+      - id: b
+        text: Microagents reduce the need for prompt engineering entirely
+      - id: c
+        text: Microagents keep responsibilities narrow, context manageable, and failures isolated inside a larger deterministic system
+        correct: true
+      - id: d
+        text: Microagents always use fewer tokens than any other architecture
+    explanation: |
+      The argument is about reliability, not ideology. Small focused agents are easier to reason about, easier to supervise, easier to recover from, and easier to compose with deterministic workflows and human approvals.
