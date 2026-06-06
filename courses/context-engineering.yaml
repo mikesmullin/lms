@@ -179,25 +179,9 @@ steps:
       The *only* thing that determines how well it answers those questions is
       what's in the context window.
 
-      ### The quality hierarchy
+      ![Infographic: the layers that make up a coding agent's context window](courses/images/ctx-engi.png)
 
-      Ranked from most damaging to least:
-
-      | Problem | Impact |
-      |---------|--------|
-      | **Bad information** — wrong understanding of how the system works | Worst. Can cause thousands of bad lines of code. |
-      | **Missing information** — agent doesn't know relevant files or patterns | Bad. Agent wastes tokens searching or makes assumptions. |
-      | **Too much noise** — irrelevant files, giant JSON blobs from MCP tools | Manageable but wasteful. |
-
-      ### The corollary error hierarchy
-
-      > A bad line of code is a bad line of code.
-      > A bad line of a plan can be hundreds of bad lines of code.
-      > A bad line of research — a misunderstanding of how the system works —
-      > can be thousands of bad lines of code.
-
-      Optimise context for: **correctness**, **completeness**, and **size**.
-      The less context you consume to do the work, the better your results.
+      Make the context **correct first**, **sufficient second**, and **small third**. If something is wrong, remove it immediately; if it's irrelevant, keep it out of the window.
 
   - id: research-plan-implement
     type: concept
