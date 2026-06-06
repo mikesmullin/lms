@@ -215,6 +215,8 @@ steps:
 
       That does not make fact memory weak. It makes it the **first real layer** in a broader memory stack.
 
+      > Frontier work: [Memvid](https://github.com/memvid/memvid) embeds fact chunks as QR code frames in a portable video file
+
   - id: quiz-mem0-and-facts
     type: challenge
     kind: multiple-choice
@@ -304,6 +306,8 @@ steps:
 
       Graph structure preserves the domain shape once the right entities and relations are known.
 
+      > Frontier work: [zvec](https://github.com/alibaba/zvec) is a fast in-process vector database from Alibaba.
+
   - id: memory-needs-formal-shape
     type: concept
     title: Structured Memory Eventually Needs a Formal Shape
@@ -320,6 +324,8 @@ steps:
       The graph gives memory structure.
 
       The ontology gives that structure a **formal, inspectable vocabulary**.
+
+      > Frontier work: Garry Tan's [gbrain](https://x.com/garrytan/status/2046002383021555986) uses markdown frontmatter
 
   - id: quiz-graph-memory
     type: challenge

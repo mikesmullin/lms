@@ -125,6 +125,8 @@ steps:
       switching to a fresh context. This file becomes the onboarding document
       for the next agent session.
 
+      > Frontier work: [headroom](https://github.com/chopratejas/headroom) is a collection of specialists that compact by type
+
       A good progress file includes:
 
       - **What we're building** — the goal, in one paragraph
