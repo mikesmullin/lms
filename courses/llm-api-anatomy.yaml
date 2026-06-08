@@ -94,7 +94,7 @@ steps:
 
   - id: request-shape-overview
     type: concept
-    title: "The Request Shape at a Glance"
+    title: "The Request Body Shape at a Glance"
     content: |
       Before we dissect each field, here is the whole picture. This is the
       anatomy of a typical request to an OpenAI-compatible chat API — headers
@@ -104,6 +104,16 @@ steps:
 
       Keep this mental model handy — the next few slides zoom into each part:
       the **model**, the **messages** array, and the **sampling parameters**.
+
+  - id: agentic-loop-diagram
+    type: concept
+    title: The Agentic Loop
+    content: |
+      A single API request is one step inside a larger cycle. The agent perceives its context, reasons, calls a tool or returns a response, observes the result, and loops until the goal is reached.
+
+      ![Diagram: the agentic loop — perceive, reason, act, observe, repeat](courses/images/agentic-loop.png)
+
+      Each iteration of this loop is one or more LLM API calls. Understanding the anatomy of that call is what gives you control over how the loop behaves.
 
   - id: request-model
     type: concept

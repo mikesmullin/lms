@@ -102,7 +102,7 @@ steps:
 
       An agent that can only read text is limited to text tasks. An agent that can see a screenshot can do anything a human clicking a UI can do.
 
-      > Frontier work: Block's Goose AI tries to [anticipate](https://x.com/lennysan/status/1983272629625843908) your next move.
+      > Frontier work: Block's [Goose AI](https://goose-docs.ai/) tries to [anticipate](https://x.com/lennysan/status/1983272629625843908) your next move.
 
   - id: capability-reasoning
     type: concept
