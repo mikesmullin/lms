@@ -416,7 +416,7 @@
                             <div class="flip-face absolute inset-0 rounded-2xl border border-edge/60 bg-gradient-to-br from-surface2 to-surface p-7 grid place-items-center text-center">
                               <div>
                                 <p class="text-[11px] uppercase tracking-widest text-accent font-bold mb-3">Prompt</p>
-                                <p class="text-xl sm:text-2xl font-semibold text-ink" x-text="currentCard(s)?.front"></p>
+                                <div class="prose-lms text-xl sm:text-2xl font-semibold text-ink" x-html="renderMarkdown(currentCard(s)?.front || '')"></div>
                                 <p class="mt-6 text-xs text-inkfaint flex items-center justify-center gap-1.5"><i class="ph ph-cursor-click"></i> Click to flip</p>
                               </div>
                             </div>
@@ -424,7 +424,7 @@
                             <div class="flip-face back absolute inset-0 rounded-2xl border border-accent/40 bg-gradient-to-br from-surface3 to-surface2 p-7 grid place-items-center text-center">
                               <div>
                                 <p class="text-[11px] uppercase tracking-widest text-accent2 font-bold mb-3">Answer</p>
-                                <p class="text-lg sm:text-xl text-ink" x-text="currentCard(s)?.back"></p>
+                                <div class="prose-lms text-lg sm:text-xl text-ink" x-html="renderMarkdown(currentCard(s)?.back || '')"></div>
                               </div>
                             </div>
                           </div>
