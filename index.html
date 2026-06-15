@@ -129,9 +129,9 @@
 
     /* Flashcard 3D flip */
     .flip-scene { perspective: 1400px; }
-    .flip-card { transform-style: preserve-3d; transition: transform .55s cubic-bezier(.2,.7,.2,1); }
+    .flip-card { display: grid; transform-style: preserve-3d; transition: transform .55s cubic-bezier(.2,.7,.2,1); }
     .flip-card.is-flipped { transform: rotateY(180deg); }
-    .flip-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .flip-face { grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
     .flip-face.back { transform: rotateY(180deg); }
 
     /* Smooth global transitions */
@@ -409,11 +409,11 @@
                         </div>
 
                         <div class="flip-scene mb-6">
-                          <div class="flip-card relative w-full min-h-[240px] cursor-pointer select-none"
+                          <div class="flip-card w-full min-h-[240px] cursor-pointer select-none"
                             :class="fc.flipped && 'is-flipped'"
                             @click="fc.flipped = !fc.flipped">
                             <!-- front -->
-                            <div class="flip-face absolute inset-0 rounded-2xl border border-edge/60 bg-gradient-to-br from-surface2 to-surface p-7 grid place-items-center text-center">
+                            <div class="flip-face rounded-2xl border border-edge/60 bg-gradient-to-br from-surface2 to-surface p-7 grid place-items-center text-center">
                               <div>
                                 <p class="text-[11px] uppercase tracking-widest text-accent font-bold mb-3">Prompt</p>
                                 <div class="prose-lms text-xl sm:text-2xl font-semibold text-ink" x-html="renderMarkdown(currentCard(s)?.front || '')"></div>
@@ -421,7 +421,7 @@
                               </div>
                             </div>
                             <!-- back -->
-                            <div class="flip-face back absolute inset-0 rounded-2xl border border-accent/40 bg-gradient-to-br from-surface3 to-surface2 p-7 grid place-items-center text-center">
+                            <div class="flip-face back rounded-2xl border border-accent/40 bg-gradient-to-br from-surface3 to-surface2 p-7 grid place-items-center text-center">
                               <div>
                                 <p class="text-[11px] uppercase tracking-widest text-accent2 font-bold mb-3">Answer</p>
                                 <div class="prose-lms text-lg sm:text-xl text-ink" x-html="renderMarkdown(currentCard(s)?.back || '')"></div>
