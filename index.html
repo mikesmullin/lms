@@ -825,7 +825,7 @@
       // ================= ICONS / LABELS =================
       stepIcon(step) {
         if (!step) return 'circle';
-        if (step.type === 'concept') return 'book-open-text';
+        if (step.type === 'concept') return this.hasVideoEmbed(step) ? 'video' : 'book-open-text';
         if (step.type === 'complete') return 'trophy';
         if (step.type === 'challenge') {
           if (step.kind === 'flashcards') return 'cards';
@@ -836,11 +836,17 @@
       },
       stepTypeLabel(step) {
         if (!step) return '';
-        if (step.type === 'concept') return 'Reading';
+        if (step.type === 'concept') return this.hasVideoEmbed(step) ? 'Watching' : 'Reading';
         if (step.type === 'complete') return 'Completion';
         if (step.kind === 'flashcards') return 'Flashcards';
         if (step.kind === 'multiple-choice') return 'Quiz';
         return 'Challenge';
+      },
+      hasVideoEmbed(step) {
+        if (!step?.content) return false;
+        const yt = /^\s*(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)[\w-]{11}(?:[^\s]*)?\s*$/i;
+        const tw = /^\s*https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/\w+\/status\/\d+(?:\/video\/\d+)?(?:\?[^\s]*)?\s*$/i;
+        return step.content.split('\n').some(line => yt.test(line) || tw.test(line));
       },
       stepBadgeClass(step) {
         const s = this.stepStatus(step);
