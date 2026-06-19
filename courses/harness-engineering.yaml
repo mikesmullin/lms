@@ -338,7 +338,7 @@ steps:
     type: concept
     title: "Whats a Claw?"
     content: |
-      By early 2026, **harness engineering** had moved from theory to production runtimes. A family of practical **agent runtimes** emerged under the nickname **Claw** (starting with **[OpenClaw](https://openclaw.ai/)**).
+      By early 2026, **harness engineering** had moved from theory to production runtimes. A family of practical **agent runtimes** emerged under the nickname **Claw** (starting with **[OpenClaw](https://openclaw.ai/)**, see also: [33min video intro](https://x.com/MatthewBerman/status/2023843493765157235)).
 
       A **Claw** is a *concrete implementation* of a harness — the actual engine that runs the agent loop you design. It handles the always-on execution, tool dispatch, context/memory lifecycle, triggers, and persistence so the loop can operate reliably without constant human babysitting.
 
@@ -346,25 +346,13 @@ steps:
 
       ### The Claw Family (Key Examples)
 
-      | Claw              | Primary Focus                  | Tech Highlights                                      | Best For                                      |
-      |-------------------|--------------------------------|------------------------------------------------------|-----------------------------------------------|
-      | **[OpenClaw](https://openclaw.ai/)**     | Full-featured foundation      | Rich memory, tools, multi-channel, plugins          | General personal & coding agents             |
-      | **[IronClaw](https://github.com/nearai/ironclaw)**     | Security & auditability       | Rust + WASM sandboxes + encrypted vault + TEE (NEAR) | Enterprise, credentials, sensitive data      |
-      | **[ZeroClaw](https://zeroclaw.net/)**     | Extreme efficiency            | Rust, **<5 MB RAM**, **<10 ms** startup, static binary | Edge devices, low-cost hardware, concurrency |
-      | **[NullClaw](https://github.com/nullclaw/nullclaw)**     | Minimalist speed              | Zig, **678 KB** static binary, **~1 MB RAM**, **<2 ms** boot | Ultra-light autonomous setups                |
-      | **[NemoClaw](https://github.com/NVIDIA/NemoClaw)** + **[OpenShell](https://developer.nvidia.com/blog/run-autonomous-self-evolving-agents-more-safely-with-nvidia-openshell/)** | Sandboxed governance     | NVIDIA stack + policy engine                        | Safe always-on agents at scale               |
+      | Claw                  | Primary Focus                              | Tech Highlights                                              | Best For                                              |
+      |-----------------------|--------------------------------------------|--------------------------------------------------------------|-------------------------------------------------------|
+      | **[OpenClaw](https://openclaw.ai/)**         | Full-featured foundation                   | Rich memory, tools, multi-channel, plugins                   | General personal & coding agents (very early! unsafe! suffered hacks!)                      |
+      | **[Hermes](https://github.com/NousResearch/hermes-agent)**           | Self-improving agent runtime               | Skills system, persistent memory, sub-agents, MCP support    | Long-running agents that learn and improve over time (popular for home agents) |
+      | **[NemoClaw](https://github.com/NVIDIA/NemoClaw)** + **[OpenShell](https://developer.nvidia.com/blog/run-autonomous-self-evolving-agents-more-safely-with-nvidia-openshell/)** | Sandboxed w/ governance | NVIDIA stack + policy engine                                 | Enterprise-ready always-on agents at scale (most safe)                        |
 
-      ### NVIDIA OpenShell — The Governance Layer
-
-      **[NVIDIA OpenShell](https://developer.nvidia.com/blog/run-autonomous-self-evolving-agents-more-safely-with-nvidia-openshell/)** (Apache 2.0) is a critical *companion runtime*. It sits **between** any claw (or **[Claude Code](https://code.claude.com/)**, Codex, etc.) and your infrastructure.
-
-      It delivers:
-      - Isolated sandboxes with **live policy enforcement** (filesystem, network, process)
-      - Privacy router (keep sensitive work on local models when possible)
-      - Full audit trails and **deny-by-default** controls
-      - **Zero code changes** required in the agent itself
-
-      One command can wrap an existing claw in a governed, auditable environment. This is harness engineering at the infrastructure layer.
+      **Honorable mentions:** **[IronClaw](https://github.com/nearai/ironclaw)** (Rust + WASM sandboxes), **[ZeroClaw](https://zeroclaw.net/)** (Rust, <5 MB RAM, <10 ms startup), **[NullClaw](https://github.com/nullclaw/nullclaw)** (Zig, 678 KB static binary, ~1 MB RAM), **[PicoClaw](https://github.com/sipeed/picoclaw)** (Go, <10 MB RAM, <1s boot, multi-arch static binary), and **[MimiClaw](https://github.com/memovai/mimiclaw)** (Pure C, no OS, ESP32-class hardware, ~0.5W power).
 
       ### Harness Frameworks (Often Layered on Claws)
 
@@ -373,6 +361,7 @@ steps:
       - **[Beads](https://github.com/gastownhall/beads)** (Steve Yegge): Persistent memory + work-tracking system. Agents use a simple `bd` tool so they never lose track of long-horizon tasks across sessions.
       - **[GasTown](https://github.com/gastownhall/gastown)** (Steve Yegge): Multi-agent orchestrator. Runs dozens of **[Claude Code](https://code.claude.com/)** / claw instances in parallel with defined roles (**Mayor** orchestrates, **Polecats** execute, **Witness**/**Deacon** monitor health, etc.). Think *"factory floor supervisor"* or lightweight Kubernetes for agents.
       - **[GStack](https://github.com/garrytan/gstack)** (Garry Tan): 23+ opinionated slash-command **skills** that turn **[Claude Code](https://code.claude.com/)** (and compatible agents) into a *virtual engineering team* — CEO, Eng Manager, Designer, QA Lead, Security Officer, Release Manager, etc. Extremely popular for structured, high-quality coding workflows.
+        - **[GBrain](https://github.com/garrytan/gbrain)** (Garry Tan): Persistent memory & knowledge layer. Self-wiring knowledge graph, structured memory, skillpacks. Giving claws (OpenClaw, Hermes, etc.) long-term memory.
 
   - id: final-quiz
     type: challenge
