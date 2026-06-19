@@ -228,11 +228,12 @@ steps:
 
       ### Real-world examples
 
-      **Ralf** — took over the internet for how effective (and simple) it was:
+      [**Ralph Loop**](https://x.com/agrimsingh/status/2010412150918189210) — took over the internet for how effective (and simple) it was:
       - Creates a production requirements document
       - Converts it to a JSON task list
       - Loops feature-by-feature until completion
       - Repository is remarkably small and readable
+      - Hear from the author [Geoffrey Huntley](https://www.youtube.com/watch?v=SB6cO97tfiY)
 
       **Anthropic's simple harness demo**:
       - Lightweight, minimal environment
@@ -248,6 +249,42 @@ steps:
 
       > The harness repository is always *tiny*. The power comes from the loop
       > structure, not from complex orchestration code.
+
+  - id: claude-agent-loop
+    type: concept
+    title: "The Claude Agent Loop"
+    content: |
+      The most effective AI agents today are built on a clean three-phase loop. It powers Claude Code, and Anthropic has formalised it as the [**Claude Agent Loop**](https://code.claude.com/docs/en/agent-sdk/agent-loop) — a reusable framework for building agents across any domain.
+
+      ### Phase 1 — Gather Context
+
+      Before acting, the agent loads what it needs to know:
+
+      - **Subagents** parallelize context gathering for efficiency
+      - **Compaction and context maintenance** keep the window clean across iterations
+      - **Agentic / semantic / hybrid search** retrieves the most relevant context — hybrid approaches (keyword + vector) work especially well for coding domains
+
+      ### Phase 2 — Take Action
+
+      The agent does the work:
+
+      - **Tools and prebuilt MCP servers** for structured capabilities
+      - **Bash / scripts / Skills** for fast, composable operations
+      - **Code generation and execution** for dynamic behavior
+      - Routing and code execution can also enhance MCP efficiency — similar to how LLM routing increases throughput in multi-model systems
+
+      ### Phase 3 — Verify Output
+
+      The agent checks its own work before the loop continues:
+
+      - **Rule-based verification** for clear pass/fail criteria
+      - **Visual feedback** — increasingly important in multimodal tasks
+      - **LLM-as-a-Judge** for fuzzy quality rules where rigid checks fall short
+      - Keep it proportionate: reach for computer-using agents only when a well-crafted script won't do the job
+
+      ### Why this matters
+
+      This is not a theoretical model. It is the architecture that ships in real tools. When you understand the three phases, you can diagnose where a loop breaks down, tune each phase independently, and compose more reliable agents.
 
   - id: how-layers-relate
     type: concept
@@ -296,6 +333,46 @@ steps:
         back: Ralf (creates a PRD, loops feature-by-feature, tiny repo) and Cursor's cloud agents (run off-device, create PRs, integrate with Slack).
       - front: Does harness engineering replace prompt engineering?
         back: No. Harness engineering encompasses prompt and context engineering. A modern agent still has a well-written system prompt (prompt engineering) and smart context loading (context engineering) inside each harness iteration.
+
+  - id: what-is-a-claw
+    type: concept
+    title: "Whats a Claw?"
+    content: |
+      By early 2026, **harness engineering** had moved from theory to production runtimes. A family of practical **agent runtimes** emerged under the nickname **Claw** (starting with **[OpenClaw](https://openclaw.ai/)**).
+
+      A **Claw** is a *concrete implementation* of a harness — the actual engine that runs the agent loop you design. It handles the always-on execution, tool dispatch, context/memory lifecycle, triggers, and persistence so the loop can operate reliably without constant human babysitting.
+
+      > If **harness engineering** is the discipline of *writing loops and quality gates*, a Claw is the runtime that **executes** that loop in the real world.
+
+      ### The Claw Family (Key Examples)
+
+      | Claw              | Primary Focus                  | Tech Highlights                                      | Best For                                      |
+      |-------------------|--------------------------------|------------------------------------------------------|-----------------------------------------------|
+      | **[OpenClaw](https://openclaw.ai/)**     | Full-featured foundation      | Rich memory, tools, multi-channel, plugins          | General personal & coding agents             |
+      | **[IronClaw](https://github.com/nearai/ironclaw)**     | Security & auditability       | Rust + WASM sandboxes + encrypted vault + TEE (NEAR) | Enterprise, credentials, sensitive data      |
+      | **[ZeroClaw](https://zeroclaw.net/)**     | Extreme efficiency            | Rust, **<5 MB RAM**, **<10 ms** startup, static binary | Edge devices, low-cost hardware, concurrency |
+      | **[NullClaw](https://github.com/nullclaw/nullclaw)**     | Minimalist speed              | Zig, **678 KB** static binary, **~1 MB RAM**, **<2 ms** boot | Ultra-light autonomous setups                |
+      | **[NemoClaw](https://github.com/NVIDIA/NemoClaw)** + **[OpenShell](https://developer.nvidia.com/blog/run-autonomous-self-evolving-agents-more-safely-with-nvidia-openshell/)** | Sandboxed governance     | NVIDIA stack + policy engine                        | Safe always-on agents at scale               |
+
+      ### NVIDIA OpenShell — The Governance Layer
+
+      **[NVIDIA OpenShell](https://developer.nvidia.com/blog/run-autonomous-self-evolving-agents-more-safely-with-nvidia-openshell/)** (Apache 2.0) is a critical *companion runtime*. It sits **between** any claw (or **[Claude Code](https://code.claude.com/)**, Codex, etc.) and your infrastructure.
+
+      It delivers:
+      - Isolated sandboxes with **live policy enforcement** (filesystem, network, process)
+      - Privacy router (keep sensitive work on local models when possible)
+      - Full audit trails and **deny-by-default** controls
+      - **Zero code changes** required in the agent itself
+
+      One command can wrap an existing claw in a governed, auditable environment. This is harness engineering at the infrastructure layer.
+
+      ### Harness Frameworks (Often Layered on Claws)
+
+      These patterns and tools are commonly used **with** or **on top of** a claw runtime:
+
+      - **[Beads](https://github.com/gastownhall/beads)** (Steve Yegge): Persistent memory + work-tracking system. Agents use a simple `bd` tool so they never lose track of long-horizon tasks across sessions.
+      - **[GasTown](https://github.com/gastownhall/gastown)** (Steve Yegge): Multi-agent orchestrator. Runs dozens of **[Claude Code](https://code.claude.com/)** / claw instances in parallel with defined roles (**Mayor** orchestrates, **Polecats** execute, **Witness**/**Deacon** monitor health, etc.). Think *"factory floor supervisor"* or lightweight Kubernetes for agents.
+      - **[GStack](https://github.com/garrytan/gstack)** (Garry Tan): 23+ opinionated slash-command **skills** that turn **[Claude Code](https://code.claude.com/)** (and compatible agents) into a *virtual engineering team* — CEO, Eng Manager, Designer, QA Lead, Security Officer, Release Manager, etc. Extremely popular for structured, high-quality coding workflows.
 
   - id: final-quiz
     type: challenge
