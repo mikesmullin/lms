@@ -1,6 +1,6 @@
-id: coding-reliability-microagents
-title: "Coding Reliability with Microagents"
-description: "Learn the engineering patterns that make production coding agents reliable: prompts, context, state, control flow, human handoffs, and small focused microagents."
+id: working-reliably-microagents
+title: "Working Reliably with Microagents"
+description: "Learn the engineering patterns that make production agents reliable: prompts, context, state, control flow, human handoffs, and small focused microagents."
 icon: shield-check
 version: "1.0"
 tags:

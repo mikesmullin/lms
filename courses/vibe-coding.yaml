@@ -1,0 +1,542 @@
+id: vibe-coding
+title: "Vibe Coding: Building with AI"
+description: "Practical techniques for writing specs, designing modular systems, using linters as feedback loops, and getting reliable, high-quality results from AI coding agents."
+icon: code
+version: "1.0"
+tags:
+  - AI
+  - Coding
+  - Vibe Coding
+  - Specs
+  - Architecture
+  - Productivity
+
+steps:
+  - id: intro
+    type: concept
+    title: "Welcome to Vibe Coding"
+    content: |
+      **Vibe coding** is the art of getting dramatically better results from AI coding agents by focusing on the inputs and environment you control — rather than trying to micromanage every line of generated code.
+
+      ![Vibe Coding](courses/images/vibe-coding.jpg)
+
+      The core philosophy is simple:
+
+      - Spend the majority of your time on **high-leverage inputs** (specs, architecture, feedback mechanisms)
+      - Let the agent handle the mechanical work of writing code
+      - Use tight feedback loops (especially linters) so the agent can self-correct
+
+      By the end of this course you will be able to:
+
+      - Run an effective “Plan Mode” workflow to think through ideas before writing code
+      - Write specs that produce reliable code on the first or second try
+      - Use voice effectively for development
+      - Work with multiple parallel sessions and forks
+      - Create clear, actionable documentation (PRDs and TDDs)
+      - Use ASCII art wireframes to get consistent UI/UX results
+      - Set up powerful linter feedback loops (including LLM-powered subjective rules)
+      - Design modular codebases that stay well within context windows
+      - Measure and optimize your token and time efficiency
+
+  - id: video-airbnb
+    type: concept
+    title: "Watch: AirBnB's Approach to Agentic Coding"
+    content: |
+      This talk shows how Airbnb's developer platform team brought agentic coding into real engineering workflows without forcing every developer into the same tool or surface.
+
+      https://www.youtube.com/watch?v=o6oYc9-X9Iw
+
+      Key ideas to listen for:
+      - Airbnb frames agentic coding through the pair-programming analogy: the human becomes the navigator while agents materialize code changes.
+      - Their early 2025 forecast expected 20-40% agentic PR adoption by year end, but they were already around the low 60% range when the talk was recorded.
+      - They measure progress holistically: developer sentiment, tool usage/adoption, and objective engineering-system metrics like PR velocity.
+      - Human review still matters; engineers need to understand and challenge the generated diff before submitting it for another human review.
+      - Parallel agentic sessions work best with sandboxed cloud workspaces, strong code review culture, and tooling around the agent, not just the agent itself.
+      - Airbnb's strategy was to bring agents to Airbnb and Airbnb to agents: **AirChat** (their internal agent deployment abstraction), CLI/IDE surfaces, **[MCP servers](https://modelcontextprotocol.io/)**, internal knowledge, auth, security review paths, and templates all make the workflow usable at company scale.
+
+  - id: plan-mode
+    type: concept
+    title: "Writing Specs: Plan Mode"
+    content: |
+      Before writing a formal PRD, TDD, or spec, many experienced vibe coders use a personal **Plan Mode** workflow. This is where the majority of the “80% spec time” actually happens.
+
+      ### How Plan Mode Works
+
+      1. **Start with a blank scratchpad** (usually a dedicated Markdown file).
+      2. Tell the agent it can **only edit this one file** until you explicitly say “exit plan mode”.
+      3. Begin dumping thoughts as a **bullet hierarchy** (voice input works great here — it can be messy).
+      4. Once the core ideas are captured, ask the agent to generate more formal artifacts:
+         - Data models and schemas
+         - Class hierarchies (as Mermaid diagrams)
+         - ASCII wireframes
+         - API contracts
+      5. Use precise citation methods for corrections:
+         - Select lines in VS Code → `Ctrl+L` ([Copy Relative Path and Line Numbers](https://marketplace.visualstudio.com/items?itemName=ezforo.copy-relative-path-and-line-numbers)) → paste file + line range into a bullet list like `- {{file:line}} {{instructions}}`
+         - Or use inline markers like `>>> EDITORS_NOTE: {{instructions}}` below the relevant line
+      6. End the plan mode with this powerful closing instruction:
+
+         > Ask me clarifying questions. Ask for permission before proceeding to edit code.
+
+      ### Why This Works So Well
+
+      Because you spent so much time thinking through the problem in a structured way, the final generation step often feels like **popcorn** — 2,000–3,000 lines of highly relevant code can appear with 85–90% accuracy on the first try. From there you only need light, targeted corrections using the same citation techniques.
+
+      This approach is **completely tool-agnostic**. It works with any LLM, any editor, and any harness. You stay in full control of the rules of Plan Mode.
+
+  - id: writing-docs
+    type: concept
+    title: "Writing Docs: PRDs and TDDs"
+    content: |
+      Good documentation keeps both you *and* the AI aligned over a long project. A **Product Requirements Document** (PRD) and a **Technical Design Document** (TDD) cover similar ground from slightly different angles. Just using these abbreviations is enough for the LLM to generate a good outline, but it's also good for you to know generally this is the type of information you'll be providing in a good plan document:
+
+      ### Combined Outline (good reading order)
+
+      - **Problem Statement** — What user pain or system gap are we solving?
+      - **Goals & Success Metrics** — How will we know this is done? (quantitative where possible)
+      - **Current State & Problems** — What exists today, and what's broken or missing?
+      - **User Personas & Scenarios** — Who is affected and what are their journeys?
+      - **Requirements**
+        - Functional Requirements
+        - Non-Functional Requirements (performance, security, accessibility, etc.)
+      - **Scope**
+        - In Scope
+        - Out of Scope (explicitly stated)
+      - **Proposed Solution** — High-level architecture or approach
+      - **Detailed Design**
+        - Data Models / Schema Changes
+        - API / Interface Design
+        - Key Algorithms or Flows
+      - **Trade-offs & Alternatives Considered**
+      - **Testing Strategy**
+      - **Timeline & Milestones**
+      - **Rollback / Migration Plan**
+      - **Risks, Assumptions & Open Questions**
+      - **Future Considerations** (Phase 2+, extensibility)
+
+      I usually like to put these type of files in `docs/*.md` alongside the code in the repository. These are a bit more polished than your average plan mode document. If you keep them up to date, they're also reusable; they can be treated like living documents which are great for bootsrapping new prompt sessions, throughout the **Software Development Lifecycle** (SDLC). Because they're human readable, they're also serving as great documentation onboarding for any new contributors to the project.
+
+  - id: ascii-wireframes
+    type: concept
+    title: "Wireframing GUIs in ASCII Art"
+    content: |
+      One of the most reliable techniques for getting good UI/UX from LLMs is to provide **ASCII art wireframes**.
+
+      ### The Technique
+
+      1. Draw a simple ASCII wireframe.
+      2. Use **unique symbols** for every distinct component instance (letters, words, emojis, or short labels).
+      3. Immediately follow the diagram with a `WHERE:` section.
+      4. For each symbol, explain: **look**, **feel**, **behavior**, and **purpose**.
+
+      This combination dramatically reduces ambiguity and gives the model a clear mental model of the interface.
+
+      ### Example
+
+      ```text
+      +-----------------------------+
+      |  [H]                        |
+      |-----------------------------|
+      |  [S]           |  [M]       |
+      |                |            |
+      |                |            |
+      |                |  [O]       |
+      |-----------------------------|
+      |  [F]                        |
+      +-----------------------------+
+      ```
+
+      **WHERE:**
+
+      - `[H]`: Top navigation bar. Dark background, white text. Contains logo (left) and user avatar + menu (right). Sticky on scroll.
+      - `[S]`: Left sidebar navigation. Light gray background. Collapsible on mobile. Contains primary navigation links with icons.
+      - `[M]`: Main content area. White background with subtle card shadows. Displays the primary page content.
+      - `[O]`: Form area. Display each field with progressive disclosure.
+      - `[F]`: Footer. Small text, centered. Contains legal links and copyright. Hidden on very small screens.
+
+      As you can see, it is a way to concisely describe both form (layout) and function.
+
+  - id: flashcard-plan-docs-wireframes
+    type: challenge
+    kind: flashcards
+    title: "Review — Foundations, Docs & Wireframes"
+    cards:
+      - front: What is the core philosophy of vibe coding?
+        back: Focus on high-leverage inputs like specs, architecture, and feedback mechanisms, then let the agent handle the mechanical work of writing code.
+      - front: What restriction defines Plan Mode?
+        back: The agent can only edit the dedicated scratchpad file until you explicitly exit plan mode.
+      - front: What kinds of artifacts can Plan Mode produce before code generation?
+        back: Data models, schemas, class hierarchies, Mermaid diagrams, ASCII wireframes, API contracts, and similar planning artifacts.
+      - front: Why keep PRDs and TDDs in docs/*.md alongside the code?
+        back: They stay reusable across sessions, support the SDLC, and help onboard both AI agents and human contributors.
+      - front: What makes an ASCII wireframe useful to an LLM?
+        back: "A simple diagram with unique symbols followed immediately by a WHERE: section that explains each symbol's look, feel, behavior, and purpose."
+
+  - id: writing-specs
+    type: concept
+    title: "Writing Specs: The 80/20 Rule"
+    content: |
+      The single highest-leverage habit in vibe coding is **spending far more time writing the spec than generating code**.
+
+      > **Rule of thumb**: Spend **80% of your time writing and refining the spec**, and only **20%** actually prompting the model to generate code.
+
+      A good spec acts as a contract. The clearer and more complete it is, the less the model has to guess — and the less you have to correct later.
+
+      ### Spec Frameworks
+
+      Two popular structured approaches have emerged:
+
+      - **[SpecKit](https://www.youtube.com/watch?v=1QpTm_kaCm4)**: A spec-driven flow that typically produces `spec.md` → `plan.md` → `tasks.md`. Excellent for breaking large features into small, verifiable chunks.
+      - **[BMAD](https://www.youtube.com/watch?v=1QpTm_kaCm4)** (Blueprint Method for Agentic Development): Uses role-handoff pipelines. Different agents (or agent modes) handle analysis → planning → architecture → implementation with explicit handoffs.
+
+      You don’t *have* to use these frameworks. Many people get excellent results with a well-written Markdown spec + a clear task list.
+
+      **Key principle**: The quality of the output is almost entirely determined by the quality of the spec.
+
+  - id: voice-driven
+    type: concept
+    title: "Voice-Driven Development"
+    content: |
+      At this point in vibe coding, many practitioners spend **~80% of their time talking** rather than typing.
+
+      ### Why Voice Works So Well
+
+      - Much faster than typing, especially when tired
+      - The LLM is surprisingly good at understanding intent even with typos or rambling
+      - You only need to type technical terms and syntax
+      - If you mess up a sentence, just rephrase it — no need to backspace
+      - Great for brainstorming during Plan Mode
+
+      ### Activation Keywords & Routines
+
+      Many people set up voice commands for repetitive tasks (typing passwords, 2FA, home automation, etc.).
+
+      **Simple option**: Push-to-talk tools like [handy.computer](https://handy.computer/) or [BridgeVoice](https://www.youtube.com/watch?v=VplNyFNo2oI)
+
+      **Advanced option**: Tools with always-on perception and rich tool ecosystems, such as the client-server architecture built around [whisper](https://github.com/mikesmullin/whisper).
+
+  - id: multi-session-forking
+    type: concept
+    title: "Working with Multiple Sessions & Forks"
+    content: |
+      Modern editors (especially VS Code + GitHub Copilot) make it easy to work with many prompt sessions in parallel.
+
+      ### Recommended Practices
+
+      - Keep **4–8 windows** open at once when doing complex work
+      - Make heavy use of the **fork** feature
+
+      ### Powerful Forking Patterns
+
+      - **Parallel execution**: Fork one session to do deep work while another answers questions or does research (similar to Claude Code’s `/btw` command).
+      - **Research forks**: When you need more context, fork a session to gather and summarize information, then paste the report back to the parent.
+      - **Task-per-fork**: For a long list of items that each need deep context, create one fork per item. Share learning between forks via a common markdown file.
+      - **Specialist-fork**: Divide each fork into specialized roles: front-end, back-end, database, documentation, repo, etc. This way anything you need to do repeatedly will always be in context; You won't need to explain yourself--in fact, you'll even be able to use shorthand notation. (e.g., "punch it!" "deploy it agian", "update again", "again")
+
+      Forking gives you fine-grained control and lets you scale your thinking across multiple focused contexts without losing the parent thread.
+
+  - id: video-parallel-vibe-coding
+    type: concept
+    title: "Example: Parallel Vibe Coding in Action"
+    content: |
+      One of the best real-world examples of heavy parallel vibe coding is **Matthew Miller** (@matthewmillerai), founder of BridgeMind.
+
+      He regularly streams long "no talking" sessions where he runs **many AI agents in parallel** across multiple sessions and windows — often 10–16+ agents working simultaneously while he ships features.
+
+      This is a great example of the multi-window + forking workflow taken to an extreme.
+
+      Watch him explain here:
+
+      https://www.youtube.com/watch?v=3eYzhp-o-f4
+
+      You can also watch one of his [4-hour livestreams](https://www.youtube.com/watch?v=NuBXwDZ7jAI) to see him in action.
+
+      Pay attention to how he manages context across many parallel agents and how little verbal explanation he needs once the agents are set up.
+
+  - id: quiz-specs-voice-forking
+    type: challenge
+    kind: multiple-choice
+    title: "Check Your Understanding — Specs, Voice & Forking"
+    question: "Which workflow best matches the course's guidance for scaling vibe coding beyond a single prompt session?"
+    choices:
+      - id: a
+        text: Spend most of your time refining the spec, use voice to capture intent quickly, and split research or implementation into focused forks.
+        correct: true
+      - id: b
+        text: Skip planning, open one long-running session, and ask the agent to discover the architecture while coding.
+      - id: c
+        text: Avoid voice input because LLMs require perfectly typed prompts to understand technical intent.
+      - id: d
+        text: Keep all work in one window so every branch of thought shares the same context.
+    explanation: |
+      The course recommends high-quality specs, voice-heavy planning, and multiple focused sessions or forks. That combination lets you move quickly while keeping each context focused and understandable.
+
+  - id: video-spotify
+    type: concept
+    title: "Watch: Spotify's Approach to AI Agents"
+    content: |
+      This talk shows how Spotify scaled AI-assisted development across a large engineering org, then adapted its developer experience for teams and agents working together.
+
+      https://www.youtube.com/watch?v=zFslvuvYifQ
+
+      Key ideas to listen for:
+      - Spotify runs at large scale: thousands of engineers, thousands of daily deployments, and a 40M-line backend monorepo.
+        - More than 99% of Spotify engineers use AI coding tools every week.
+        - 94% of engineers report that AI tooling has helped them become more productive.
+        - PR frequency is up 76%, with most shipped PRs now authored by an AI agent together with a developer.
+      - **[Honk](https://engineering.atspotify.com/2025/11/spotifys-background-coding-agent-part-1)** is Spotify’s background coding agent. It wraps Claude through the [Agent SDK](https://docs.anthropic.com/en/docs/agents-and-tools), runs in Spotify’s harness, uses trusted tools, verifies changes in CI, and connects to **[Fleetshift](https://backstage.spotify.com/fleetshift)** for large migration work.
+      - **Chirp** turns agent work into a shared, multiplayer workflow where teams can coordinate many Honk sessions instead of treating agents as one-person chat tools.
+      - **[Backstage](https://backstage.io/)**, standard stacks, golden paths, lint checks, and static analysis make the codebase easier for both humans and agents to navigate.
+      - As coding becomes less constrained, bottlenecks move toward product judgment, planning, review load, and deciding where human oversight matters most.
+
+  - id: using-linters
+    type: concept
+    title: "Using Linters as a Feedback Loop"
+    content: |
+      One of the highest-leverage moves in vibe coding is giving the LLM **immediate, executable feedback** via linters instead of relying only on long documentation files.
+
+      ### Why This Works So Well
+
+      - The linter returns **file + line-range citations** with specific warnings
+      - The LLM can immediately act on that feedback in the same session
+      - It creates a **virtuous cycle**: generate → lint → fix → repeat
+      - The context window stays relatively light because only the relevant feedback is injected
+      - Documentation can live in the linter rules (and sprawl as much as needed) without bloating every prompt
+
+      This is often **more effective** than putting everything in a `docs/` directory, because the linter surfaces the *right* rule at the *right* time.
+
+      ### Recommended Tool: code-reviewer
+
+      I strongly recommend using **[code-reviewer](https://github.com/mikesmullin/code-reviewer)** (or building something similar).
+
+      What makes it special:
+      - It supports **LLM-powered linter rules** in addition to deterministic ones
+      - You can encode *subjective* standards (“Is this code readable? Does it follow our team’s philosophy?”) and have an LLM judge them
+      - It returns structured, actionable feedback the agent can consume directly
+
+      ### Layered Review Strategy (Recommended)
+
+      1. **Deterministic linters** first ([Spectral](https://github.com/stoplightio/spectral), [OPA](https://www.openpolicyagent.org/), [ESLint](https://eslint.org/), etc.)
+      2. **LLM-powered subjective rules** (via code-reviewer or similar)
+      3. **Human review + final approval**
+
+      With this layering, the human reviewer usually only has to look at a small number of remaining issues. Over time, patterns that keep reaching the human layer become new linter rules — continuously raising the floor.
+
+  - id: modular-design
+    type: concept
+    title: "Designing Modular, LLM-Friendly Codebases"
+    content: |
+      AI agents work dramatically better when your codebase is intentionally designed to be modular and digestible.
+
+      ### Core Guidelines
+
+      - **Aim for ≤ 500 lines per file**
+      - **Aim for ≤ 50 lines per function**
+      - Prefer **high normalization** and **very low coupling** between systems
+      - Each system should be independently understandable, testable, and reviewable by the LLM
+
+      When systems are small and loosely coupled, the agent can load just the relevant context for a task instead of trying to hold the entire codebase in its context window.
+
+      ### Two Architectures That Work Especially Well
+
+      **1. Entity Component System (ECS) + Archetypes**
+
+      ECS is excellent for LLM-assisted development because:
+      - Behavior is broken into small, focused **systems**
+      - Data lives in **components**
+      - Entities are just collections of components
+      - Systems operate on archetypes (groups of entities with the same components)
+
+      This creates natural boundaries and makes it easy to add or modify behavior without touching unrelated code.
+
+      **2. Agent Pipeline Architecture**
+
+      Think of this as a **game engine loop** for your agentic workflows:
+
+      - A main loop that invokes a series of **stages** (systems) in order
+      - Each stage does one focused job and passes data forward
+      - Stages can be independently developed, tested, and reasoned about
+
+      This pattern is especially powerful for agentic loops because it mirrors how the agent itself thinks (perceive → reason → act → observe) while keeping each piece small.
+
+      Both approaches let you break large problems into reusable, independently verifiable pieces that stay comfortably inside context windows.
+
+  - id: token-efficiency
+    type: concept
+    title: "Measuring & Optimizing Token Efficiency"
+    content: |
+      As you become more advanced, it becomes valuable to track not just output quality, but **efficiency**.
+
+      ### Why Track This?
+
+      A good agentic engineer cares about:
+      - Wall-clock time
+      - Tokens / cost spent
+      - Overall output quality
+
+      The goal is to finish tasks more efficiently than the average practitioner (sometimes called **tokenmaxxing** — but with a focus on *smart* usage, not just burning tokens).
+
+      ### Recommended Tooling
+
+      Build or use a tool that can:
+      - Read your editor sessions
+      - Calculate wait time + input/output tokens
+      - Show cost per session
+      - Count tokens in files (to test fit in 200k / 1M context windows)
+
+      Having visibility into your actual spend and efficiency helps you continuously improve your workflow.
+
+  - id: debugging-when-lost
+    type: concept
+    title: "Debugging When the LLM Gets Lost"
+    content: |
+      Even with good specs and indexing, agents can get stuck on complex bugs. Here’s how to recognize it and steer the process effectively.
+
+      ### Signs the LLM Is Lost
+
+      - It spends a very long time “thinking” before responding
+      - It has made several attempts but keeps circling or regressing
+      - Reproducing the problem takes many slow steps (poor iteration speed)
+
+      When you see these patterns, shift from “generate code” mode into **debugging mode**.
+
+      ### Effective Debugging Techniques
+
+      **1. Traces (Critical Path Logging)**  
+      One of the highest-leverage moves: ask the agent to add temporary log output prefixed with `file:lineno` at each step along the suspected path.  
+      Optionally include timers to measure elapsed time.  
+      The agent can then stop guessing and reason directly from the actual runtime output.  
+      This works for stdout, devtools console, or even captured screenshots at key points.
+
+      **2. Standalone Tests**  
+      When reproduction is slow, give the agent a focused, runnable test it can iterate on quickly.  
+      Use mocks for non-essential systems so it can isolate the problematic logic.  
+      These tests can be added to a normal test suite (or triggered selectively) for long-term stability.
+
+      **3. MCP Debugger**  
+      Empower the agent to drive an interactive debugger instead of just reading code.  
+      Example: [mcp-bun-debug](https://github.com/mikesmullin/mcp-bun-debug) for Bun/JavaScript.
+
+      **4. MCP Browser Tools**  
+      For UI or operational flows, let the agent observe or interact with the actual running application:  
+      - Built-in VS Code browser tool (often the strongest)  
+      - [mikesmullin/browser](https://github.com/mikesmullin/browser) (headless `browser-use` wrapper)  
+      - [browsermcp](https://browsermcp.io/) (controls your existing browser session/cookies)
+
+      **5. Smoke Tests**  
+      A lightweight, mostly-English set of instructions that describes a realistic user flow or integration scenario.  
+      The agent can run a “smoke test” after changes and will usually generate comprehensive coverage.  
+      These can live in a markdown file or be promoted into a repeatable test suite.
+
+      These techniques dramatically improve iteration speed and help the agent get unstuck without burning excessive tokens or context.
+
+  - id: flashcard-tooling-debugging
+    type: challenge
+    kind: flashcards
+    title: "Review — Tooling, Architecture & Debugging"
+    cards:
+      - front: Why are linters often more effective than docs/ directories during agentic coding?
+        back: They surface the right rule at the right time with precise file and line-range citations the agent can act on immediately.
+      - front: What are the three layers of the recommended review strategy?
+        back: Deterministic linters first, LLM-powered subjective rules second, and human review plus final approval third.
+      - front: What file and function size targets keep a codebase LLM-friendly?
+        back: Aim for 500 lines or fewer per file and 50 lines or fewer per function.
+      - front: What two architectures does the course highlight for LLM-assisted development?
+        back: Entity Component System with archetypes, and Agent Pipeline Architecture with focused stages.
+      - front: What should you measure when optimizing token efficiency?
+        back: Wall-clock time, tokens and cost spent, and overall output quality.
+      - front: What is critical path logging useful for when the LLM gets lost?
+        back: It gives the agent concrete runtime output, often prefixed with file and line information, so it can reason from observed behavior instead of guessing.
+      - front: Why use standalone tests when reproduction is slow?
+        back: They give the agent a fast, focused loop for isolating problematic logic without repeatedly running a slow end-to-end flow.
+
+  - id: large-codebases
+    type: concept
+    title: "Large Codebases"
+    content: |
+      At 25 million+ lines of code, simply giving the model more context stops working. The real frontier is **strong indexing and retrieval systems** that let agents dynamically fetch only the relevant parts of the codebase with high precision.
+
+      This is what makes reliable vibe coding possible at enterprise scale.
+
+      ### Why Strong Indexing Matters
+
+      - Raw context windows (even 1M+ tokens) are insufficient for true monorepos.
+      - Pure vector embeddings struggle with precise relationships and impact analysis.
+      - Good retrieval dramatically reduces context switching and token waste while improving accuracy.
+
+      ### Current Cutting-Edge Techniques
+
+      - **Hybrid Retrieval**: Combines semantic embeddings + AST parsing + dependency/call graphs.
+      - **AST-aware Chunking & Symbol Resolution** (Tree-sitter based): Creates semantically meaningful chunks instead of naive text splits.
+      - **Code Knowledge Graphs**: Multi-relation graphs (containment, imports, inheritance, invocations) for precise traversal and impact analysis.
+      - **Codemaps & Hierarchical Maps**: AI-generated structured overviews of execution flow and component relationships.
+      - **Hierarchical / Multi-Stage Retrieval**: Broad semantic search → graph traversal → focused symbol-level detail.
+      - **Incremental & Persistent Indexing**: Real-time updates as code changes.
+
+      ### Leading Tools & Approaches (2026)
+
+      | Tool                          | Strengths                                      | Key Techniques                          | Best For |
+      |-------------------------------|------------------------------------------------|-----------------------------------------|----------|
+      | **[Windsurf Codemaps](https://cognition.ai/blog/codemaps)** | Task-aware hierarchical maps of code relationships | AI-annotated structured maps + graphs  | Large/complex/legacy systems |
+      | **[Glean](https://glean.software/)** (Meta) | Production-scale incremental indexing          | Fact collection + powerful querying    | Extremely large internal repos |
+      | **[ast-grep](https://ast-grep.github.io/)** | Fast structural search using AST patterns      | Tree-sitter + pattern matching         | Precise refactoring & finding |
+      | **[Sourcegraph Cody](https://sourcegraph.com/cody)** | Deep enterprise code intelligence              | Universal code graph + embeddings      | Monorepos & cross-repo work |
+      | **[Augment Code](https://www.augmentcode.com/)** | Very large repos with autonomous agents        | Strong Context Engine                  | Enterprise execution at scale |
+      | **Hybrid Custom MCPs**        | Flexible & controllable                        | AST + embeddings + graphs              | Tailored agent workflows |
+
+      ### Practical Takeaways for Vibe Coding
+
+      - Treat indexing/retrieval as a first-class part of your harness.
+      - Combine semantic search with structural/graph layers for best results.
+      - Use tools like Codemaps and ast-grep to give both you *and* the agent better mental models of the system.
+      - Keep changes small and bounded — even with great retrieval, large refactors benefit from Plan Mode + verification loops.
+      - Build or adopt retrieval via MCP so agents can query the index dynamically instead of hoping the right context is already loaded.
+      - Maintain a `docs/` folder in the repo with markdown documentation describing the archicture and every system.
+      - Maintain an `AGENTS.md` file describing coding conventions and best practices.
+
+      Strong indexing is what allows the high-leverage, relatively relaxed style of vibe coding to scale beyond small-to-medium projects.
+  
+  - id: video-stripe
+    type: concept
+    title: "Watch: How Stripe Approaches AI-Assisted Development"
+    content: |
+      This talk breaks down Stripe's **Minions** system as an example of production-grade agentic engineering in a high-stakes, large-codebase environment.
+
+      https://www.youtube.com/watch?v=V5A1IU8VVp4
+
+      Key ideas to listen for:
+      - **[Minions](https://stripe.dev/blog/minions-stripes-one-shot-end-to-end-coding-agents)** are unattended coding agents that can start from Slack, CLI, or a web interface, then produce a branch, run CI, and prepare a GitHub PR for review.
+      - Stripe gives agents warm, isolated dev boxes so they can work in environments that mirror human developer machines while still being parallelizable and predictable.
+      - **Blueprints** combine deterministic workflow steps with flexible agent reasoning: run linters, push changes, fix CI failures, and invoke agents only where judgment is useful. (See [Part 2](https://stripe.dev/blog/minions-stripes-one-shot-end-to-end-coding-agents-part-2))
+      - Scoped rule files solve the large-context problem by attaching relevant instructions as agents traverse particular directories and file patterns.
+      - **The Tool Shed** centralizes hundreds of MCP tools so agents can discover and use the right internal capabilities without loading everything into context.
+      - The larger lesson is that reliable agentic engineering comes from **owning the harness**: context, tools, validation, review paths, and the code-plus-agent workflow around the model.
+
+  - id: references
+    type: concept
+    title: "References & Further Reading"
+    content: |
+      - Stop writing code by hand — [Lee Robinson on X](https://x.com/leerob/status/2007203275461009508)
+      - Anthropic tips on working with AI — [Startup Ideas Pod on X](https://x.com/startupideaspod/status/2036122417970684148)
+      - Demystifying prompts — [Hamel Husain](https://hamel.dev/blog/posts/prompt/)
+      - Team of agents — [Sairahul on X](https://x.com/sairahul1/status/2055199726589391151)
+      - Spec frameworks — [BMAD & SpecKit](https://www.youtube.com/watch?v=1QpTm_kaCm4)
+      - ASCII wireframes — [bbssppllvv on X](https://x.com/bbssppllvv/status/2023425897442037973)
+      - ASCII tool — [ASCIIFlow](https://asciiflow.com/)
+
+  - id: final-quiz
+    type: challenge
+    kind: multiple-choice
+    title: "Final Check — Vibe Coding"
+    question: "For a 25M+ line codebase, what does the course identify as the real frontier for making reliable vibe coding possible?"
+    choices:
+      - id: a
+        text: Put the full repository into a larger raw context window and let the model sort it out
+      - id: b
+        text: Strong indexing and retrieval systems that let agents dynamically fetch only the relevant parts of the codebase
+        correct: true
+      - id: c
+        text: Avoid documentation so the agent spends all of its context budget on source files
+      - id: d
+        text: Use only vector embeddings and avoid structural or graph-based code analysis
+    explanation: |
+      Large raw context windows are not enough for true monorepos. Reliable large-scale vibe coding depends on strong retrieval: hybrid search, AST-aware chunking, code graphs, codemaps, and MCP-style tools that fetch relevant context on demand.
