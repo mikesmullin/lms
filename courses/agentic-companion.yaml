@@ -1,0 +1,209 @@
+id: agentic-companion
+title: "The Agentic Companion"
+description: "A new class of AI agent that doesn't just respond — it perceives, anticipates, and thinks alongside you. Move beyond reactive tools into proactive, goal-oriented partnership."
+icon: users
+version: "1.0"
+tags:
+  - AI
+  - Agents
+  - Productivity
+  - Perception
+  - Future of Work
+
+steps:
+
+  - id: future-of-work
+    type: concept
+    title: "The Future of Work"
+    content: |
+      The Companion represents a meaningful shift in how we work *with* AI. Your companion works for you, belongs to you, travels with you. Wherever you go, it is there; it is a reflection of your skill, your knowledge, and your experience. It magnifies the places you can be at one time (omni-presence), others can ineract with your companion at any time of day, perhaps even while you're sleeping.
+
+      The goal is not fewer people doing less work; it is the same team producing dramatically more: more experiments, more products, more shipped ideas, and more creative surface area.
+
+      In practice, this may feel paradoxical: we may be _more busy than ever_ and _less busy than ever_ at the same time:
+
+      - **More busy**, because our visible output increases dramatically. We will supervise many more products, features, pull requests, and experiments as they cross the finish line. From the outside, it will look like our work has accelerated enormously.
+
+      - **Less busy**, because the day-to-day motion may become lighter and more repetitive: reviewing work, clicking approve, correcting small mistakes, and steering agents back on track. With practice, managing four to eight agents at once could become a low-cognitive-load skill — more like monitoring a process than personally carrying every detail in your head. This frees our minds for bigger picture _creative and strategic thinking_.
+
+      That shift could also untether workers from their office, desk, and laptop. If agent interaction becomes voice-first, you might supervise progress _from your phone_ while listening to music, watching a video, joining a call, walking, playing a game, or doing physical work. The human role becomes less about constant typing and more about judgment, taste, attention, and timely intervention.
+
+      AI eliminates individual tasks — not human purpose. When one task is automated, new tasks appear around it: deciding what should be built, reviewing the agent's work, improving the system, handling edge cases, and teaching the agent to do better next time. Beyond that, there is the continuous work of optimization; producing more in the same time.
+
+      For an individual worker, the future may feel less like wrestling one problem for days and more like standing beside a software factory line:
+      - Reviewing pull requests and tickets as they move past
+      - Approving the work the agent is ready to do
+      - Checking the quality of completed output
+      - Cleaning up the occasional mess
+      - Training the agent through feedback, examples, and better guardrails
+
+      In that world, the Companion multiplies human effectiveness. It behaves less like a replacement and more like a fast-learning intern: capable of taking on real work, still needing judgment and direction, and improving quickly when coached well.
+
+  - id: video1
+    type: concept
+    title: "Watch: Jensen"
+    content: |
+      Jensen's segment frames agentic AI as a multiplier for work: agents can use the tools we already understand, while humans still provide direction, control, and judgment.
+
+      https://youtu.be/gwW8GKwHB3I?si=kj4RKUvclCFSYEpR&t=1457
+
+      Key points to watch for:
+      - Agentic systems compress serious workflows: the examples include replacing a software stack in 90 minutes and using auto-research to generate thesis-level insight from new data in 30 minutes.
+      - The shift is from models that answer questions to systems that get work done through tool use, memory, storage, browsers, spreadsheets, databases, and specialized applications.
+      - Jensen's counterpoint to "enterprise software gets destroyed" is that agents may create far more demand for existing tools because they need places to do work and return controllable output.
+      - The human role stays centered on deciding goals, checking ground truth, shaping domain expertise, and supervising what the agents produce.
+
+  - id: video2
+    type: concept
+    title: "Watch: Boris"
+    content: |
+      Boris Cherny makes the Companion future feel operational: coding agents are becoming persistent collaborators that can run loops, coordinate through tools, and move bottlenecks from typing code to supervising work.
+
+      https://www.youtube.com/watch?v=Z47vatpsGPI
+
+      Key points to watch for:
+      - Boris says 100% of his code has been written by Claude Code since Opus 4.5, and much of his current coding happens _from his phone_ or _by voice_.
+      - He frames agent adoption as ROI, not just cost: give tokens broadly to engineers, PMs, designers, data scientists, and others so unexpected internal use cases can surface.
+      - The abstraction is moving from hand-written source code, to agents writing code, to agents prompting agents in loops that review code, read feedback, update status, or maintain a codebase.
+      - Once coding speeds up, the bottlenecks move to ideas, review, security, shipping, product judgment, and whether a pull request should exist at all.
+      - Co-work points toward Companion-style behavior for non-engineers: a guarded agent using the browser, Slack, spreadsheets, and other tools to coordinate real work with little setup.
+
+  - id: intro
+    type: concept
+    title: "What is The Companion?"
+    content: |
+      Most AI tools today are **reactive**. You prompt them, and they respond.
+
+      **The Companion** represents a different category of agent — one that is *proactive* and *perceptive*. It doesn't wait to be told what to do. Instead, it:
+
+      - Observes what you're doing
+      - Understands your goals and patterns
+      - Anticipates what you'll need next
+      - Makes suggestions and takes helpful actions on your behalf
+
+      Listen to this example of one such experiment:
+
+      https://x.com/lennysan/status/1983272629625843908
+
+      It functions as an **accountability partner** that helps you move toward your goals with less friction.
+
+  - id: reactive-vs-proactive
+    type: concept
+    title: "From Reactive Tools to Proactive Companions"
+    content: |
+      Traditional AI assistants operate on a simple loop:
+
+      **You prompt → AI responds**
+
+      A Companion operates on a richer loop:
+
+      **Observe → Understand → Anticipate → Support**
+
+      This shift changes the relationship from *tool* to *partner*. The Companion can notice when you're stuck, when you're in flow, when you're avoiding something important, or when a better approach exists — and then gently surface that insight.
+
+  - id: perception
+    type: concept
+    title: "Perception: The Core Capability"
+    content: |
+      At the heart of a Companion is **perception** — the ability to take in information from your environment and make sense of it.
+
+      ![Perception example](courses/images/perception.png)
+
+      Perception can include:
+      - What's on your screen
+      - What you're saying in meetings or to yourself
+      - Your patterns of work and focus over time
+      - The tools and apps you use
+      - Your stated (and unstated) goals
+
+      One early example of perception in action is **[goose-perception](https://github.com/michaelneale/goose-perception)**.
+
+  - id: knowing-you
+    type: concept
+    title: "Knowing You: Building a Digital Twin"
+    content: |
+      A Companion gets powerful when it develops a deep model of *you*.
+
+      This includes:
+      - Your goals (both short-term and long-term)
+      - Your working style and preferences
+      - What usually blocks or energizes you
+      - How you like to receive feedback and suggestions
+      - Your past decisions and their outcomes
+
+      ![an agentic companion](courses/images/companion.jpg)
+
+      Over time, the Companion builds a **digital twin** of your working mind. This allows it to make recommendations that feel personally relevant rather than generic.
+
+  - id: self-assessment-1
+    type: challenge
+    kind: multiple-choice
+    title: "Check Your Understanding"
+    question: What is the key difference between a reactive AI tool and a Companion?
+    choices:
+      - id: a
+        text: A Companion responds faster to prompts
+      - id: b
+        text: A Companion observes context, anticipates needs, and acts proactively
+        correct: true
+      - id: c
+        text: A Companion only works with coding tasks
+      - id: d
+        text: A Companion requires no human input at all
+    explanation: |
+      The core shift is from waiting for instructions to proactively observing and supporting the user.
+
+  - id: anticipation
+    type: concept
+    title: "Anticipation & Thinking For You"
+    content: |
+      Once a Companion can perceive and know you, it can begin to **anticipate**.
+
+      Anticipation means:
+      - Predicting what you'll likely do next
+      - Identifying what would be helpful *before* you ask for it
+      - Spotting potential problems or opportunities early
+      - Breaking down complex goals into clear, actionable next steps
+
+      This is where the Companion starts acting like a coach or thinking partner — not just a tool that waits for commands.
+
+  - id: observation-pomodoro
+    type: concept
+    title: "Observation & Adaptive Support"
+    content: |
+      A Companion can gather rich context with very little effort from you through observation.
+
+      It can:
+      - Listen to relevant conversations (with permission)
+      - Observe your screen and activity patterns
+      - Maintain an automatic log or journal of your work
+      - Notice shifts in focus, energy, or mood over time
+
+      **Example – Replacing Pomodoro:**
+      Instead of using a rigid 25/5 timer, a Companion could observe how *you* actually work and make personalized suggestions about when to take breaks, switch tasks, or adjust your approach based on your real patterns.
+
+  - id: design-principles
+    type: concept
+    title: "Design Principles for Companions"
+    content: |
+      Effective Companions tend to follow several key principles:
+
+      - **Proactive, not pushy** — They surface insights without demanding constant attention
+      - **Observant, not invasive** — They gather context respectfully and transparently
+      - **Goal-oriented** — They stay aligned with what *you* actually care about
+      - **Memory-rich** — They maintain continuity and learn across sessions
+      - **Humble** — They make suggestions rather than assumptions and improve when corrected
+
+  - id: final-assessment
+    type: challenge
+    kind: flashcards
+    title: "Key Concepts Review"
+    cards:
+      - front: What does it mean for an AI to be "proactive" rather than reactive?
+        back: It observes context and takes initiative to support goals instead of waiting for explicit prompts.
+      - front: What is the role of perception in a Companion?
+        back: It allows the agent to understand what the user is doing, thinking, and needing without being told directly.
+      - front: How is a Companion different from a traditional productivity tool like Pomodoro?
+        back: It can adapt recommendations based on observed behavior, energy, and patterns rather than using fixed rules.
+      - front: What does it mean for a Companion to "think for you"?
+        back: It anticipates needs, breaks down problems, and suggests next steps aligned with your goals.

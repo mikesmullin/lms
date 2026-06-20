@@ -983,17 +983,27 @@
       },
 
       // Turn a lone YouTube URL on its own line into a responsive embed.
-      // e.g.  https://www.youtube.com/watch?v=ID  or  https://youtu.be/ID
+      // e.g.  https://www.youtube.com/watch?v=ID  or  https://youtu.be/ID?t=90
       // Also handles bare Twitter/X status URLs on their own line.
       embedVideos(md) {
-        const yt = /^\s*(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})(?:[^\s]*)?\s*$/i;
+        const yt = /^\s*(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})([^\s]*)?\s*$/i;
         const tw = /^\s*(https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/\w+\/status\/\d+(?:\/video\/\d+)?(?:\?[^\s]*)?)\s*$/i;
+        const timestampToSeconds = (value) => {
+          if (!value) return 0;
+          if (/^\d+$/.test(value)) return Number(value);
+          const match = value.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$/i);
+          if (!match) return 0;
+          return (Number(match[1] || 0) * 3600) + (Number(match[2] || 0) * 60) + Number(match[3] || 0);
+        };
         return md.split('\n').map(line => {
           // YouTube
           const ym = line.match(yt);
           if (ym) {
             const id = ym[1];
-            return `\n<div class="video-embed"><iframe src="https://www.youtube-nocookie.com/embed/${id}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>\n`;
+            const params = new URLSearchParams((ym[2] || '').replace(/^[?&]/, ''));
+            const start = timestampToSeconds(params.get('t') || params.get('start'));
+            const startParam = start ? `?start=${start}` : '';
+            return `\n<div class="video-embed"><iframe src="https://www.youtube-nocookie.com/embed/${id}${startParam}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>\n`;
           }
           // Twitter/X — render via blockquote + widget script
           const tm = line.match(tw);
