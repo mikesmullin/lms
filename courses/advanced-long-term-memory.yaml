@@ -323,6 +323,8 @@ steps:
 
       That is where ontology enters the picture.
 
+      ![Diagram: markdown documents flow through a concept extraction model into entities, attributes, and relations, forming an ontology graph](courses/images/md2ontology.png)
+
       The graph gives memory structure.
 
       The ontology gives that structure a **formal, inspectable vocabulary**.
