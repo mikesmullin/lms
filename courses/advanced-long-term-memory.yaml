@@ -295,6 +295,8 @@ steps:
     content: |
       These approaches solve different problems.
 
+      ![Diagram: a markdown document is chunked, run through an embeddings model, and mapped into a semantic vector space](courses/images/md2vectordb.png)
+
       | Memory style | Best at | Weakest at |
       |-------------|---------|------------|
       | Vector memory | Semantic similarity and fuzzy recall | Explicit multi-hop structure |
