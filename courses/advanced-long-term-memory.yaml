@@ -350,9 +350,9 @@ steps:
     type: concept
     title: "Case Study: Measuring an Ontology Graph's Payoff"
     content: |
-      https://www.youtube.com/watch?v=xFpeMUDsgF4
-
       Is a self-wiring knowledge graph worth the engineering cost, or just an expensive wrapper around vector search? The **G-Brain Evals** benchmark answers with a deterministic, adversarial test suite instead of a friendly demo.
+
+      https://www.youtube.com/watch?v=xFpeMUDsgF4
 
       **The stress test:** the "Amara Life V1" corpus simulates a messy week of real personal data — 300 overlapping Slack messages, meeting transcripts, and dense theoretical discussions — deliberately seeded with stale facts, paraphrased "semantic poison," and direct contradictions that punish naive similarity matching.
 
@@ -374,7 +374,26 @@ steps:
 
       **Why it matters:** typed graph hits resolve exact relational and chronological facts *before* backfilling the rest of the context with vector results — beating pure semantic proximity at a task it structurally cannot do: knowing which fact is still current.
 
-      > Frontier Work: Garry Tan's [gbrain](https://x.com/garrytan/status/2046002383021555986) uses markdown frontmatter
+      > Frontier work: Garry Tan's [gbrain](https://x.com/garrytan/status/2046002383021555986) uses markdown frontmatter
+
+  - id: karpathy-llm-knowledge-base
+    type: concept
+    title: "Frontier Work: A Second Brain Built Almost Entirely by an LLM"
+    content: |
+      Not every memory system needs a database. Andrej Karpathy's ["LLM Knowledge Bases"](https://x.com/karpathy/status/2039805659525644595) post (April 2026) went viral — 60k+ likes, 21M+ views — describing a personal knowledge base maintained almost entirely by an LLM.
+
+      His workflow:
+
+      1. Drop raw sources (articles, papers, images) into a `raw/` folder
+      2. An LLM incrementally **compiles** everything into a clean, linked Markdown wiki — summaries, backlinks, concept pages
+      3. **Obsidian** serves as the read/write frontend for browsing and editing
+      4. The LLM does most of the ongoing writing and maintenance, not the human
+      5. Querying the wiki produces answers that get filed back in as new or updated pages
+      6. Periodic LLM **health checks** catch inconsistencies and fill gaps
+
+      **Why it matters here:** it's the same write → maintain → retrieve → use lifecycle from this course, one layer down from a full ontology graph. The `raw/` folder is unstructured input, the linked wiki is durable semantic memory, backlinks act as a lightweight relation graph, and the health check is manual-triggered maintenance instead of automatic CRUD reconciliation.
+
+      It's a reminder that plain Markdown, backlinks, and disciplined maintenance habits can approximate real memory infrastructure — no database required.
 
   - id: quiz-graph-memory
     type: challenge
