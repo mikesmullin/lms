@@ -291,45 +291,90 @@ steps:
 
   - id: graph-vs-vector-memory
     type: concept
-    title: Graph Memory vs Vector Memory
+    title: "Vector Databases: Retrieval by Meaning"
     content: |
-      These approaches solve different problems.
+      **The problem:** full-text search only finds what you literally typed. Search your notes for "pet food" and a note that says "small animal snacks" is invisible — zero words match. Agents constantly need to recall things *described differently* than they were stored. Keyword search silently misses them.
+
+      **The solution:** a vector database finds information by **meaning**, not spelling. If two pieces of text are *about* the same thing, they match — even with no words in common.
+
+      **How it works, in simple terms:**
 
       ![Diagram: a markdown document is chunked, run through an embeddings model, and mapped into a semantic vector space](courses/images/md2vectordb.png)
 
-      | Memory style | Best at | Weakest at |
-      |-------------|---------|------------|
-      | Vector memory | Semantic similarity and fuzzy recall | Explicit multi-hop structure |
-      | Graph memory | Typed entities and relationship traversal | Broad fuzzy retrieval without extra indexing |
+      1. Documents are split into **chunks** (paragraph-sized pieces)
+      2. An **embeddings model** converts each chunk into a **vector** — a long list of numbers encoding its meaning
+      3. Vectors live in a shared **semantic space**, where similar meanings sit close together ("puppy" lands near "dog", far from "invoice")
+      4. A query is embedded the same way, and the database returns the **nearest neighbors** — the closest vectors by **similarity**
 
-      In practice, many strong systems combine them.
+      **Terminology to know:**
 
-      Vector retrieval helps find relevant material.
+      | Term | Meaning |
+      |------|---------|
+      | Embedding | A text chunk converted to a vector of numbers capturing meaning |
+      | Semantic search | Matching by meaning-closeness instead of exact keywords |
+      | Similarity score | How close two vectors are (often cosine similarity) |
+      | Chunking | Splitting documents into pieces small enough to embed well |
 
-      Graph structure preserves the domain shape once the right entities and relations are known.
+      **Why it beats full-text search alone:** keywords demand the user guess the exact words used at write time. Semantic search matches synonyms, paraphrases, and related concepts automatically. Strong systems still combine both — keywords for exact identifiers, vectors for fuzzy recall.
 
       > Frontier work: [zvec](https://github.com/alibaba/zvec) is a fast in-process vector database from Alibaba.
 
   - id: memory-needs-formal-shape
     type: concept
-    title: Structured Memory Eventually Needs a Formal Shape
+    title: "Ontology Databases: Memory with a Formal Shape"
     content: |
-      Once a system has entities and relationships, an immediate question appears:
+      **The problem:** vector search finds *relevant* text, but it can't answer structural questions: *Who owns server alpha? Which team is John on? Which decision replaced the old one?* Similarity can't traverse relationships — and with no schema, nothing stops the memory from storing nonsense like a server that "reports to" a person.
 
-      - what kinds of entities exist?
-      - which relations are valid?
-      - what properties belong to which class?
-      - what counts as a valid reference?
+      **The solution:** an ontology database stores memory as a **typed graph** with rules. It defines what kinds of things exist, what properties they carry, and which connections are legal — then validates every write against that vocabulary.
 
-      That is where ontology enters the picture.
+      **How it works, in simple terms:**
 
       ![Diagram: markdown documents flow through a concept extraction model into entities, attributes, and relations, forming an ontology graph](courses/images/md2ontology.png)
 
-      The graph gives memory structure.
+      1. A **concept extraction model** reads raw text and pulls out the things it mentions
+      2. Each thing becomes an **entity**, its facts become **attributes**, and its connections become **relations**
+      3. The **ontology** — the schema layer — declares which entity types, attributes, and relations are valid
 
-      The ontology gives that structure a **formal, inspectable vocabulary**.
+      **Terminology to know:**
 
-      > Frontier work: Garry Tan's [gbrain](https://x.com/garrytan/status/2046002383021555986) uses markdown frontmatter
+      | Term | What it is | Example |
+      |------|-----------|---------|
+      | Entity | A thing in the domain | `Person(John)`, `Server(alpha)` |
+      | Attribute | A property of an entity | `John.role = "engineer"` |
+      | Relation | A typed link between entities | `John -[OWNS]-> alpha` |
+      | Ontology | The rulebook: valid types, attributes, and links | "only a `Person` can `OWN` a `Server`" |
+
+      **Why it matters:** the graph gives memory structure; the ontology gives that structure a **formal, inspectable vocabulary**. The agent can traverse relations, validate new facts, and answer multi-hop questions that similarity search alone never could.
+
+  - id: gbrain-evals-case-study
+    type: concept
+    title: "Case Study: Measuring an Ontology Graph's Payoff"
+    content: |
+      https://www.youtube.com/watch?v=xFpeMUDsgF4
+
+      Is a self-wiring knowledge graph worth the engineering cost, or just an expensive wrapper around vector search? The **G-Brain Evals** benchmark answers with a deterministic, adversarial test suite instead of a friendly demo.
+
+      **The stress test:** the "Amara Life V1" corpus simulates a messy week of real personal data — 300 overlapping Slack messages, meeting transcripts, and dense theoretical discussions — deliberately seeded with stale facts, paraphrased "semantic poison," and direct contradictions that punish naive similarity matching.
+
+      **Four baselines compared:**
+
+      | Baseline | Approach |
+      |---|---|
+      | grep-only | exact lexical string matching |
+      | vector-rag | semantic embeddings only |
+      | G-Brain w/o graph | vector + lexical merged via reciprocal rank fusion |
+      | Full G-Brain | typed entity graph, backfilled with vector/graph results |
+
+      **The measured results:**
+
+      - Full G-Brain: **49.1% precision@5**, ~**98% recall@5**
+      - Beats the vector-rag baseline by **38 points** of precision
+      - Isolating the graph layer alone (vs. its graph-disabled twin): **+31.4 points** precision@5
+      - Graph-first ranking cuts total returned document payload by **53%** while doubling precision
+
+      **Why it matters:** typed graph hits resolve exact relational and chronological facts *before* backfilling the rest of the context with vector results — beating pure semantic proximity at a task it structurally cannot do: knowing which fact is still current.
+
+      > Frontier Work: Garry Tan's [gbrain](https://x.com/garrytan/status/2046002383021555986) uses markdown frontmatter
 
   - id: quiz-graph-memory
     type: challenge
