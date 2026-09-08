@@ -304,9 +304,9 @@ steps:
 
       This is often **more effective** than putting everything in a `docs/` directory, because the linter surfaces the *right* rule at the *right* time.
 
-      ### Recommended Tool: code-reviewer
+      ### Recommended Tool: code-review
 
-      I strongly recommend using **[code-reviewer](https://github.com/mikesmullin/code-reviewer)** (or building something similar).
+      I strongly recommend using **[code-review](https://github.com/mikesmullin/code-review)** (or building something similar).
 
       What makes it special:
       - It supports **LLM-powered linter rules** in addition to deterministic ones
@@ -316,7 +316,7 @@ steps:
       ### Layered Review Strategy (Recommended)
 
       1. **Deterministic linters** first ([Spectral](https://github.com/stoplightio/spectral), [OPA](https://www.openpolicyagent.org/), [ESLint](https://eslint.org/), etc.)
-      2. **LLM-powered subjective rules** (via code-reviewer or similar)
+      2. **LLM-powered subjective rules** (via code-review or similar)
       3. **Human review + final approval**
 
       With this layering, the human reviewer usually only has to look at a small number of remaining issues. Over time, patterns that keep reaching the human layer become new linter rules — continuously raising the floor.
